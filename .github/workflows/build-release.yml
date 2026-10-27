@@ -1,0 +1,171 @@
+name: Build signed APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      port_tag:
+        description: Android port release tag
+        required: true
+        default: v1.45
+      app_version:
+        description: Release version for this repository
+        required: true
+        default: 1.45.1
+      app_code:
+        description: Android versionCode
+        required: true
+        default: "14501"
+      upstream_version:
+        description: DSH kernel version embedded in the port
+        required: true
+        default: 0.2.1-rc.2
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.app_version }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PORT_REPO: guzhou079-arch/deepseek-harness-android
+      PORT_TAG: ${{ inputs.port_tag }}
+      APP_VERSION: ${{ inputs.app_version }}
+      APP_CODE: ${{ inputs.app_code }}
+      UPSTREAM_VERSION: ${{ inputs.upstream_version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout build automation
+        uses: actions/checkout@v4
+
+      - name: Checkout Android adaptation source
+        uses: actions/checkout@v4
+        with:
+          repository: guzhou079-arch/deepseek-harness-android
+          ref: ${{ inputs.port_tag }}
+          path: upstream
+          fetch-depth: 1
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Android build tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          SDKMANAGER=$(find "$SDK/cmdline-tools" -name sdkmanager -type f | head -1)
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          yes | "$SDKMANAGER" "platforms;android-34" "build-tools;34.0.0" >/dev/null
+          echo "ANDROID_JAR=$SDK/platforms/android-34/android.jar" >> "$GITHUB_ENV"
+          echo "D8_JAR=$SDK/build-tools/34.0.0/lib/d8.jar" >> "$GITHUB_ENV"
+          echo "APKSIGNER=$SDK/build-tools/34.0.0/apksigner" >> "$GITHUB_ENV"
+
+      - name: Download pinned Android base and dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/gen/com/deepseek/harness work/classes work/dex work/aar
+          base_url=$(gh release view "$PORT_TAG" --repo "$PORT_REPO" \
+            --json assets --jq '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' | head -1)
+          test -n "$base_url"
+          curl -fL --retry 4 --retry-all-errors "$base_url" -o work/base.apk
+
+          for artifact in api provider aidl; do
+            url="https://repo1.maven.org/maven2/dev/rikka/shizuku/$artifact/13.1.5/$artifact-13.1.5.aar"
+            curl -fL --retry 4 --retry-all-errors "$url" -o "work/aar/$artifact.aar"
+            unzip -p "work/aar/$artifact.aar" classes.jar > "work/aar/$artifact.jar"
+          done
+
+          node upstream/selfbuild/lib/arsc-R.js work/base.apk \
+            --out work/gen/com/deepseek/harness/R.java \
+            --package com.deepseek.harness
+
+          python scripts/patch_updater.py \
+            upstream/android-app/src/com/deepseek/harness/MainActivity.java \
+            --repo "${{ github.repository }}"
+
+          grep -F "https://api.github.com/repos/${{ github.repository }}/releases/latest" \
+            upstream/android-app/src/com/deepseek/harness/MainActivity.java
+
+      - name: Compile Android shell to DEX
+        shell: bash
+        run: |
+          set -euo pipefail
+          find upstream/android-app/src -name '*.java' -print > work/sources.txt
+          echo "work/gen/com/deepseek/harness/R.java" >> work/sources.txt
+          javac -J-Xmx1g -encoding UTF-8 -source 8 -target 8 \
+            -bootclasspath "$ANDROID_JAR" \
+            -classpath "work/aar/api.jar:work/aar/provider.jar:work/aar/aidl.jar" \
+            -d work/classes @work/sources.txt
+
+          mkdir -p work/shizuku
+          for jar in work/aar/api.jar work/aar/provider.jar work/aar/aidl.jar; do
+            unzip -qo "$jar" -d work/shizuku
+          done
+
+          find work/classes work/shizuku -name '*.class' -print > work/classes.rsp
+          java -Xmx1g -cp "$D8_JAR" com.android.tools.r8.D8 \
+            --release --lib "$ANDROID_JAR" --min-api 24 \
+            --output work/dex @work/classes.rsp
+          test -s work/dex/classes.dex
+
+      - name: Repack and version APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          node upstream/selfbuild/lib/selfbuild.js apk-pack \
+            work/base.apk - work/unsigned.apk --dex work/dex/classes.dex
+          node upstream/selfbuild/scripts/set-apk-version.js \
+            work/unsigned.apk work/versioned.apk \
+            --name "$APP_VERSION" --code "$APP_CODE" \
+            --share-target com.deepseek.harness.MainActivity
+
+      - name: Sign and verify APK
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$ANDROID_KEYSTORE_B64" | base64 --decode > work/release.p12
+          OUT="work/DeepSeekHarness-v${APP_VERSION}-standalone.apk"
+          "$APKSIGNER" sign \
+            --ks work/release.p12 \
+            --ks-key-alias "$ANDROID_KEY_ALIAS" \
+            --ks-pass env:ANDROID_KEYSTORE_PASSWORD \
+            --key-pass env:ANDROID_KEY_PASSWORD \
+            --out "$OUT" work/versioned.apk
+          "$APKSIGNER" verify --verbose --print-certs "$OUT"
+          echo "OUT=$OUT" >> "$GITHUB_ENV"
+          sha256sum "$OUT" | tee work/SHA256SUMS.txt
+
+      - name: Publish GitHub Release
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHA=$(sha256sum "$OUT" | awk '{print $1}')
+          TAG="v${APP_VERSION}"
+          BODY=$(printf 'DSH kernel: %s\n\nAndroid base: %s\n\nSHA-256: `%s`\n\nThis build follows the official DSH release train through the compatibility-gated Android port.' "$UPSTREAM_VERSION" "$PORT_TAG" "$SHA")
+          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$OUT" work/SHA256SUMS.txt --clobber --repo "${{ github.repository }}"
+            gh release edit "$TAG" --repo "${{ github.repository }}" --notes "$BODY" --latest
+          else
+            gh release create "$TAG" "$OUT" work/SHA256SUMS.txt \
+              --repo "${{ github.repository }}" \
+              --title "DSH Android ${APP_VERSION}" \
+              --notes "$BODY" \
+              --latest
+          fi
