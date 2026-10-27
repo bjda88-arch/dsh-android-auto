@@ -294,7 +294,6 @@
  *
  * Geometry is owned by mobile.css. This layer only supplies behaviours that
  * CSS cannot express:
- *   - edge swipe to open/close the DSH sidebar drawer;
  *   - close the drawer after choosing a destination;
  *   - keep drawer state aligned when the viewport crosses tablet width.
  *
@@ -302,9 +301,6 @@
  */
 (function () {
   var root = document.documentElement;
-  var SWIPE_EDGE = 22;
-  var SWIPE_DISTANCE = 58;
-  var touchStart = null;
   var lastDrawerOpen = null;
   var syncTimer = 0;
 
@@ -369,49 +365,6 @@
     if (/功能|收起|展开|更多|视图选项|添加工作区|搜索会话|账号菜单/.test(label)) return;
     setTimeout(closeDrawer, 100);
   }, true);
-
-  document.addEventListener('touchstart', function (event) {
-    if (!event.touches || event.touches.length !== 1) {
-      touchStart = null;
-      return;
-    }
-    var touch = event.touches[0];
-    var drawerOpen = !!scrim();
-    var width = parseFloat(
-      getComputedStyle(root).getPropertyValue('--dsh-mobile-drawer-width')
-    ) || 0;
-    if ((!drawerOpen && touch.clientX <= SWIPE_EDGE) ||
-        (drawerOpen && touch.clientX > width - SWIPE_EDGE)) {
-      touchStart = {
-        x: touch.clientX,
-        y: touch.clientY,
-        open: drawerOpen
-      };
-    } else {
-      touchStart = null;
-    }
-  }, { passive: true });
-
-  document.addEventListener('touchend', function (event) {
-    if (!touchStart) return;
-    var touch = event.changedTouches && event.changedTouches[0];
-    if (!touch) {
-      touchStart = null;
-      return;
-    }
-    var dx = touch.clientX - touchStart.x;
-    var dy = touch.clientY - touchStart.y;
-    var start = touchStart;
-    touchStart = null;
-    if (Math.abs(dx) < SWIPE_DISTANCE || Math.abs(dx) < Math.abs(dy) * 1.35) return;
-
-    if (!start.open && dx > 0) {
-      var menu = menuButton();
-      if (menu) menu.click();
-    } else if (start.open && dx < 0) {
-      closeDrawer();
-    }
-  }, { passive: true });
 
   window.addEventListener('resize', markViewport, { passive: true });
   window.addEventListener('orientationchange', function () {
