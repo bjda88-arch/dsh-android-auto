@@ -25,6 +25,13 @@ live DSH DOM and its upstream design tokens.
 5. A custom left-edge swipe duplicated Android's system back gesture.
 6. Several icon controls had visual sizes below a 44px mobile target.
 7. WebView text zoom was fixed at 100%, ignoring Android font-size preferences.
+8. The first-run screen used a separate cinematic black/neon visual language.
+9. The settings tab inherited white text on a pale selected state, producing a
+   measured contrast ratio of 1.2:1 in light mode.
+10. Settings descriptions used tertiary gray at only 3.54–3.7:1 on light
+    surfaces.
+11. The off-screen sidebar remained in the accessibility tree while closed.
+12. The viewport disabled zoom and the shell blocked pinch gestures.
 
 ## Changes
 
@@ -39,11 +46,22 @@ live DSH DOM and its upstream design tokens.
 - The header uses `min-height` rather than a fixed height and can expand under
   large system text.
 - WebView text zoom follows Android's system font scale between 85% and 150%.
+- Pinch zoom is restored: the viewport no longer disables scaling and WebView
+  exposes its native zoom controls without visible zoom chrome.
 - The composer uses about 95–97% of the viewport width while preserving a
   readable measure on wide landscape screens.
 - Drawer and scrim motion is limited to 160–180ms and removed under
   `prefers-reduced-motion`.
-- Boot visuals use cover scaling rather than letterboxing.
+- The 17-second cinematic boot screen was replaced by a theme-aware DSH startup
+  surface using the official whale mark, semantic colors, a quiet phase label
+  and one progress rail.
+- The initial WebView background is applied before React renders, preventing a
+  white/black flash between startup and the application.
+- The collapsed sidebar is removed from both hit testing and the accessibility
+  tree.
+- Settings tabs now use a DSH-style text tab with a blue underline; active text
+  is primary-colored instead of white on a pale background.
+- Settings section labels and descriptions use the secondary text token.
 
 ## Measured result
 
@@ -73,3 +91,7 @@ The browser renderer and bundled WebView payload were checked at the target
 aspect ratios. A physical-device pass is still required for vendor keyboards,
 cutout geometry and measured frame rate; those cannot be certified by headless
 rendering alone.
+
+Automated axe checks report zero WCAG A/AA violations for the live home screen,
+open drawer and settings screen in light mode; the drawer and settings screen
+also report zero in dark mode.
