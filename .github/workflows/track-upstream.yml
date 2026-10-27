@@ -1,0 +1,63 @@
+name: Track official DSH
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compare official and Android versions
+        id: status
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/upstream_status.py --json > status.json
+          cat status.json
+          for key in state official_version port_tag port_kernel desired_app_version should_build; do
+            value=$(jq -r ".$key" status.json)
+            echo "$key=$value" >> "$GITHUB_OUTPUT"
+          done
+      - name: Dispatch compatible Android build
+        if: steps.status.outputs.should_build == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PORT_TAG: ${{ steps.status.outputs.port_tag }}
+          APP_VERSION: ${{ steps.status.outputs.desired_app_version }}
+          UPSTREAM_VERSION: ${{ steps.status.outputs.official_version }}
+        run: |
+          major_minor=$(echo "$PORT_TAG" | sed -E 's/^v([0-9]+)\.([0-9]+).*/\1\2/')
+          app_code=$((10#$major_minor * 100 + 1))
+          gh workflow run build-release.yml \
+            --repo "${{ github.repository }}" \
+            -f port_tag="$PORT_TAG" \
+            -f app_version="$APP_VERSION" \
+            -f app_code="$app_code" \
+            -f upstream_version="$UPSTREAM_VERSION"
+      - name: Record compatibility wait
+        if: steps.status.outputs.state == 'waiting_for_android_adaptation'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OFFICIAL: ${{ steps.status.outputs.official_version }}
+          PORT: ${{ steps.status.outputs.port_tag }}
+          KERNEL: ${{ steps.status.outputs.port_kernel }}
+        run: |
+          title="Android adaptation pending for DSH $OFFICIAL"
+          existing=$(gh issue list --repo "${{ github.repository }}" \
+            --state open --search "$title in:title" --json number --jq 'length')
+          if [ "$existing" = "0" ]; then
+            gh issue create --repo "${{ github.repository }}" \
+              --title "$title" \
+              --body "Official DSH is $OFFICIAL, but the newest Android port ($PORT) contains $KERNEL. The auto-release will run after the Android port ships the compatible kernel."
+          fi
