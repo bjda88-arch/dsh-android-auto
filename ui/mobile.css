@@ -1,0 +1,1108 @@
+/* ============================================================
+   deepdive 手机版 UI 优化 v0.4 —— 适配 DSH 内核 0.2.0-rc.1
+   ------------------------------------------------------------
+   本轮背景：手机端内核从 0.1.7-rc.1 升到官方 **0.2.0-rc.1**
+   （与 PC 桌面官方版同代），前端 CSS module 哈希再次全变。
+
+   ✅ 好消息：0.2.0 的哈希只是**换前缀**，组件名不变，可机械映射：
+      0.1.7 → 0.2.0
+      .wSkVaW_*   → .wSkVaW_*      会话壳（header/root/scrollBody/headerUtilities）
+      .uV2eYG_*   → .uV2eYG_*      输入栏 InputBar（trailing/modes/tools/select/input）
+      .QsffPG_*   → .QsffPG_*      后台任务菜单
+      .VOzbGW_*   → .VOzbGW_*      设置页（panel/nav/navList/navCell/content）
+      .p-xYUq_*   → 见下（0.1.7 里它就是死选择器，本轮换真名）
+   ✅ 另一条好消息：`[class*="_名字_"]` 那套属性选择器在 0.2.0 前端里
+      **全部仍然命中**（已实测扫描 0.2.0 的 dist CSS/JS），所以本文件主体照旧有效。
+
+   ⚠ 两个 0.2.0 特有的坑（本文件已处理）：
+   1. **`D_` 前缀**：conversation 包在 0.2.0 里类名变成了 `.wSkVaW_header`
+      这种带 `D_` 前缀的形式（0.1.7 是 `.wSkVaW_header`）。写选择器时必须带上，
+      写成 `.tfqW_header` 会**完全匹配不到**（静默失效）。
+   2. **`xzv4MW_*` 不能当类选择器**：消息操作条（MessageIconActions）的类名是
+      `xzv4MW_actions` —— 以「- + 数字」开头，**不是合法的 CSS 标识符**，
+      `.xzv4MW_actions{...}` 是无效规则，浏览器整条丢弃。
+      必须改用属性选择器 `[class*="xzv4MW_actions"]`。
+
+   历史坑（0.1.7 时期，仍然适用，勿删）：
+   - 选择器必须用 `[class*="_名字_"]` 而非 Vite 哈希类名（哈希每次构建都变）。
+   - `_markdown_` 会撞上 primitives 的 FileTypeIcon（SVG 上的类名也叫 `_markdown_`），
+     竖屏块里那条 `svg[class*="_markdown_"]` 例外规则就是为它加的，
+     删掉会复现「文件行只有图标、没有名字」。
+   - `_item_`/`_label_`/`_separator_`/`_itemLabel_` 在 0.1.7 命中的是菜单/下拉菜单，
+     不是侧栏图标行 —— 相关规则已删除，不要再加回来。
+   ============================================================ */
+
+:root {
+  /* 触摸友好：点击目标最小 44px */
+  --ds-mobile-tap: 44px;
+  /* 鲸鱼蓝皮肤（与桌面版一致） */
+  --dsw-alias-brand-primary: #4D6BFE !important;
+  --dsw-alias-brand-primary-hover: #5B7CFF !important;
+  --dsw-alias-brand-primary-active: #3D5AE8 !important;
+}
+[data-ds-dark-theme] {
+  --dsw-alias-brand-primary: #4D6BFE !important;
+  --dsw-alias-brand-primary-hover: #5B7CFF !important;
+  --dsw-alias-brand-primary-active: #3D5AE8 !important;
+}
+
+/* ---------- 基础触摸优化 ---------- */
+button,
+[role="button"],
+.icon-btn,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* 16px 防止聚焦时页面缩放 */
+textarea,
+input[type="text"],
+input[type="search"] {
+  font-size: 16px !important;
+}
+
+/* 触屏滚动条更细 */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+}
+
+/* ---------- 真实类名适配（属性选择器：跨构建稳定） ---------- */
+
+/* 输入框/搜索框：加大点击与输入区 */
+[class*="_wrap_"] {
+  height: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  padding: 0 12px;
+}
+[class*="_input_"] {
+  font-size: 16px !important;
+  line-height: 28px;
+}
+
+/* 消息/回答内容：移动端全宽阅读，不挤压 */
+[class*="_answer_"],
+[class*="_markdown_"],
+[class*="_content_"] {
+  max-width: 100% !important;
+}
+
+/* 工具调用卡片：全宽 + 可读性 */
+[class*="_block_"],
+[class*="_output_"],
+[class*="_command_"] {
+  max-width: 100% !important;
+}
+
+/* 表格：窄屏可横向滚动
+   注：类名哈希随前端构建变化，用属性选择器匹配；同时覆盖前端 md-table-wide
+   的「hover 才显示滚动条」设计——触屏设备没有 hover，滚动条永远隐藏
+   导致宽表格无法横向滑动。移动端始终允许横向滚动。 */
+[class*="tableScroll"],
+.md-table-wide {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  padding-bottom: 0 !important;
+}
+
+/* 空状态 / 引导卡：宽度自适应 */
+[class*="_card_"] {
+  max-width: 100% !important;
+}
+
+/* ============ 竖屏专项适配 ============ */
+@media (orientation: portrait) {
+  html,
+  body {
+    font-size: 15.5px;
+  }
+
+  /* 会话/回答内容宽度：竖屏给足空间 */
+  [class*="_answer_"],
+  [class*="_markdown_"] {
+    width: 100%;
+    max-width: 100% !important;
+  }
+
+  /* ⚠ FileTypeIcon 例外（详见文件头「历史坑」）：
+     把尺寸还给 SVG 自身的 width/height 属性（auto = 采用属性值）。
+     只命中 svg 元素，普通容器与聊天正文不受影响；特异性 (0,1,1) 高于
+     出问题规则的 (0,1,0)，不依赖书写顺序。 */
+  svg[class*="_answer_"],
+  svg[class*="_markdown_"],
+  svg[class*="_content_"],
+  svg[class*="_block_"],
+  svg[class*="_output_"],
+  svg[class*="_command_"] {
+    width: auto !important;
+    height: auto !important;
+  }
+
+  /* 工具卡片、代码块：竖屏不横向溢出 */
+  [class*="_block_"],
+  [class*="_output_"],
+  [class*="_content_"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 底部输入区：触摸目标更大、更易点击 */
+  [class*="_wrap_"] {
+    height: 48px;
+    border-radius: 14px;
+  }
+  [class*="_input_"] {
+    font-size: 16px !important;
+  }
+}
+
+/* ============ 设置页移动端优化 ============ */
+@media (max-width: 1100px) {
+  /* 设置说明文字：行距舒展，不再挤成竖排 */
+  p,
+  li,
+  dd,
+  dt {
+    line-height: 1.75;
+  }
+
+  /* 顶部操作按钮（如"打开配置文件"）更大更好点 */
+  [class*="_button_"] {
+    min-height: 40px;
+    padding: 8px 14px;
+  }
+}
+
+/* ============ 横屏矮屏（窄高度）优化 ============ */
+@media (max-height: 520px) and (orientation: landscape) {
+  html,
+  body {
+    font-size: 14.5px;
+  }
+}
+
+/* ============ 窄屏：AI 消息操作条分多行 ============
+   MessageIconActions（复制/赞踩/分支/时间/耗时/token）原为一行 flex
+   （height:28px、文字 nowrap），窄屏下会伸出屏幕；改为允许换行。
+   ⚠ 0.2.0：类名是 `xzv4MW_actions`，以「- + 数字」开头，**不能写成类选择器**
+   （`.xzv4MW_actions` 是无效 CSS，浏览器整条丢弃）→ 用属性选择器。
+   !important 是为了压过插件运行时注入的同名规则（注入顺序在后）。 */
+@media (max-width: 640px) {
+  [class*="xzv4MW_actions"] {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: 28px;
+    row-gap: 2px;
+  }
+  [class*="xzv4MW_timeStart"],
+  [class*="xzv4MW_timeEnd"] {
+    white-space: normal !important;
+  }
+}
+
+/* ============ 窄屏：会话标题栏给左上角三条杠让位 ============
+   聊天区顶部 header 默认 padding 左 20px（0.2.0 实测 `10px 28px 0 20px`），
+   会被 fixed 在左上角（8px 起、宽 36px）的三条杠按钮盖住；
+   窄屏下把标题栏左内边距加大，让标题从三条杠右侧开始。 */
+@media (max-width: 640px) {
+  .wSkVaW_header {
+    padding-left: 52px !important;
+  }
+}
+
+/* ============ 窄屏：正文与输入框扩宽 ============
+   桌面端为三列布局预留了大量内缩，窄屏白白浪费宽度。
+   这里把内缩收小，让正文与输入栏更宽；同时滚动条不预留占位
+   （0.2.0 的 scrollBody 默认 `scrollbar-gutter:stable`，
+   会白占一条宽度把输入栏压窄 → 按钮重叠）。 */
+@media (max-width: 640px) {
+  /* 正文滚动体：滚动条不占宽度 */
+  .wSkVaW_scrollBody {
+    scrollbar-gutter: auto !important;
+  }
+  /* 正文消息区：左右内缩收小（0.2.0 的内容列内缩由内层容器负责，
+     这里同时兜住 scrollBody 自身的左右内边距） */
+  .wSkVaW_scrollBody {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  /* 输入框 dock 更宽：clearance/inset 收小 */
+  .wSkVaW_root {
+    --dsh-composer-side-clearance: 4px !important;
+    --dsh-composer-dock-inset: 4px !important;
+  }
+  /* 工具调用卡片：不贴屏幕左右边缘 */
+  [class*="_block_"],
+  [class*="_output_"],
+  [class*="_content_"] {
+    margin-left: 2px !important;
+    margin-right: 2px !important;
+  }
+}
+
+/* ============ 窄屏：输入栏右侧按钮保持一行且不重叠 ============
+   InputBar 的 trailing 一行排开（审核模式按钮 + 模型名 + token 计量），
+   窄屏下直接换行会让审核按钮掉到下一行、输入框变高；
+   这里保持一行（nowrap），通过压缩模型名宽度与按钮间距避免重叠。 */
+@media (max-width: 640px) {
+  .uV2eYG_trailing,
+  .uV2eYG_modes,
+  .uV2eYG_tools {
+    flex-wrap: nowrap !important;
+  }
+  .uV2eYG_trailing,
+  .uV2eYG_modes {
+    gap: 6px !important;
+  }
+  .uV2eYG_select {
+    max-width: 26vw !important;
+    font-size: 12px !important;
+  }
+}
+
+/* ============ 窄屏：Bash 工具卡片防横向溢出 ============
+   终端卡片里的命令文本/输出行 white-space:pre 不换行，
+   窄屏下会把卡片撑出屏幕；改为可换行（pre-wrap）。 */
+@media (max-width: 640px) {
+  [class*="_command_"],
+  [class*="_line_"] {
+    white-space: pre-wrap !important;
+    word-break: break-all;
+  }
+  [class*="_block_"] {
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+}
+
+/* ============ 插件按钮（核心渲染，靠 CSS 挪位） ============
+   窄屏下侧边栏里的插件入口不易触达；核心渲染的插件按钮
+   （header.utilities 里的 [data-cordis-badge]，单一实例）默认在右上角，
+   用 position:fixed 挪到左上角三条杠正下方。不动 DOM
+   （按钮留在 #root 内，React 事件委托才有效），只改样式。 */
+.dsh-mobile-plugin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary, #8b98a9);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.dsh-mobile-plugin-btn:active {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.08));
+  color: var(--dsw-alias-label-primary, #e6edf3);
+}
+.dsh-mobile-plugin-btn svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 1024px) {
+  .wSkVaW_headerUtilities [data-cordis-badge] {
+    position: fixed !important;
+    top: 52px !important;
+    left: 8px !important;
+    width: 32px !important;
+    height: 32px !important;
+    margin: 0 !important;
+    padding: 0 6px !important;
+    gap: 4px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    z-index: 1000 !important;
+    background: transparent !important;
+  }
+  .wSkVaW_headerUtilities [data-cordis-badge] > span {
+    display: none !important;
+  }
+}
+
+/* ============ 窄屏：后台任务菜单不超出屏幕 ============
+   后台任务下拉默认 left:0，按钮在右侧时面板向右延伸超出屏幕
+   （任务名被推到屏外）；改为右对齐向左展开。 */
+@media (max-width: 640px) {
+  .QsffPG_menu {
+    left: auto !important;
+    right: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}
+
+/* ============ 窄屏移动端：原生 App 沉浸全屏设置页 ============
+   彻底消除桌面端悬浮 Modal 带来的割裂感：
+   1. 铺满全屏（width 100vw, height 100dvh, border-radius 0）；
+   2. 隐藏背景蒙层，彻底遮盖底层聊天，纯粹原生 App 体验；
+   3. 顶部整合为标准 App 导航条（胶囊 Tab 滑动栏 + 右上角悬浮圆钮关闭）；
+   4. 内容区全宽沉浸式自然滚动，底部预留虚拟手势安全区。 */
+@media (max-width: 640px) {
+  .VOzbGW_overlay {
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    max-height: 100% !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    position: fixed !important;
+    z-index: 1000 !important;
+    background: var(--dsw-alias-bg-layer-1, #121214) !important;
+  }
+  .VOzbGW_mask {
+    display: none !important;
+  }
+  .VOzbGW_panel {
+    position: relative !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    flex-direction: column !important;
+    background: var(--dsw-alias-bg-layer-1, #121214) !important;
+    overflow: hidden !important;
+  }
+  .VOzbGW_nav {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 48px !important;
+    padding: max(12px, env(safe-area-inset-top, 12px)) 60px 10px 14px !important;
+    background: var(--dsw-alias-bg-layer-2, #1c1c1f) !important;
+    border-bottom: 0.5px solid var(--dsw-alias-border-l2) !important;
+    overflow-x: auto !important;
+    flex: none !important;
+    scrollbar-width: none !important;
+  }
+  .VOzbGW_nav::-webkit-scrollbar {
+    display: none !important;
+  }
+  .VOzbGW_navTitle {
+    display: none !important;
+  }
+  .VOzbGW_navList {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: 32px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important;
+  }
+  .VOzbGW_navList::-webkit-scrollbar {
+    display: none !important;
+  }
+  .VOzbGW_navCell {
+    flex: none !important;
+    white-space: nowrap !important;
+    height: 32px !important;
+    padding: 0 14px !important;
+    border-radius: 16px !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: var(--dsw-alias-label-secondary) !important;
+    background: transparent !important;
+    transition: all 0.2s ease !important;
+  }
+  .VOzbGW_navCell:hover {
+    background: var(--dsw-alias-interactive-bg-hover) !important;
+    color: var(--dsw-alias-label-primary) !important;
+  }
+  .VOzbGW_navCell.VOzbGW_active {
+    background: var(--dsw-alias-interactive-bg-active, #4D6BFE) !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(77, 107, 254, 0.3) !important;
+  }
+  .VOzbGW_content {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .VOzbGW_header {
+    position: absolute !important;
+    top: max(12px, env(safe-area-inset-top, 12px)) !important;
+    right: 12px !important;
+    width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: 100 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+  }
+  .VOzbGW_actions {
+    display: none !important;
+  }
+  .VOzbGW_close {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.08)) !important;
+    color: var(--dsw-alias-label-primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    border: none !important;
+    font-size: 16px !important;
+    flex: none !important;
+    transition: transform 0.15s ease !important;
+  }
+  .VOzbGW_close:active {
+    transform: scale(0.9) !important;
+  }
+  .VOzbGW_options {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+    padding: 16px 16px max(40px, env(safe-area-inset-bottom, 40px)) !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* 移动端隐藏 Tooltip（触摸端点按钮只让按钮获得焦点、不会 blur，
+   Tooltip 会赖着不走；而且它没有 scroll 监听，滚动后还错位。
+   触摸端本来就没有"悬停"这回事）。 */
+[role="tooltip"] {
+  display: none !important;
+}
+
+/* ============ 内核更新提示横幅（dsh-update-check 插件） ============
+   数据来自插件路由 /dsh-update-check/status（mobile.js 拉取并渲染）。
+   位置：顶部、给左上角三条杠（8px 起、宽 36px）留出 52px。 */
+.dsh-update-banner {
+  position: fixed;
+  top: 8px;
+  left: 52px;
+  right: 8px;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e88e5, #42a5f5);
+  color: #fff;
+  font-size: 12.5px;
+  line-height: 1.35;
+  box-shadow: 0 4px 14px rgba(30, 136, 229, 0.35);
+}
+.dsh-update-banner__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dsh-update-banner__close {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* ============ 窄屏：插件详情页「返回/面包屑」下移（2026-10-04） ============
+   症状（用户报）：插件详情页左上角那个「返回 插件列表」贴着状态栏，
+   跟左上角那条侧栏挤在一起。
+   实测那个控件是 dsh-client-ui-plugin-manager 的
+     <div class="X_2TxG_detailTop"><button class="X_2TxG_crumb">…</button></div>
+   自带 `padding-top:28px`；而移动端 WebView 顶到状态栏，28px 正落在状态栏下沿。
+   这里窄屏下加 16px（28→44）+ 左侧 8px 内缩，并把返回按钮抬到 32px 最小高。
+   ⚠ 选择器用属性包含匹配：Vite 哈希类名每次构建都变，类选择器会在换内核后静默失效。
+   ⚠ 本文件在 FORCE_OVERWRITE_PREFIXES 名单里（MainActivity:153）——
+     **改这里必须出新包才算数**，改运行副本在下次 App 启动会被打回。 */
+@media (max-width: 640px) {
+  [class*="X_2TxG_detailTop"] {
+    padding-top: 44px !important;
+    padding-left: 8px !important;
+  }
+  [class*="X_2TxG_crumb"] {
+    min-height: 32px !important;
+  }
+}
+
+/* ============ 窄屏：DockKit 面板（文件 / 终端…）的标签条被压扁（2026-10-07） ============
+   症状（用户报）：右侧「工作区文件」「终端」这两块面板，顶部的标签条位置不对 ——
+   标签贴着面板顶边、看着像被压掉一截。
+
+   实测（前端 bundle 里的 DockKit CSS，`6nhg2` 那一组）：
+     ._tabStrip_…{ height:28px; padding:10px 6px 0 …; align-items:center }
+     ._tab_…{ height:28px }  ._addTab_…{ height:28px }  ._stripChrome_…{ height:28px }
+   全局 box-sizing:border-box ⇒ 标签条的内容盒只有 28-10=18px，而里面的标签是 28px，
+   被 align-items:center 顶成上下各溢出 5px：标签比标签条还高、贴着顶边，还会压到下面的
+   工具栏。修法：把标签条的高度还给它的内容（auto + 最小 38px + 8px 上边距）。
+
+   ⚠ 选择器用属性包含匹配：Vite 哈希每次构建都变。这里挑的 "_tabStrip_" 是 DockKit
+     自己起的名字段（变的是后面的 6nhg2），所以只对哈希免疫、不对改名免疫。
+   ⚠ 本文件在 FORCE_OVERWRITE_PREFIXES 里 —— 改运行副本下次 App 启动会被打回，必须出新包。 */
+@media (max-width: 640px) {
+  [class*="_tabStrip_"] {
+    height: auto !important;
+    min-height: 38px !important;
+    padding: 8px 6px 0 var(--dsh-dockkit-strip-inline-start, 10px) !important;
+  }
+}
+
+/* ============ 窄屏：DockKit 面板标签条让开左上角那排侧栏图标（2026-10-07） ============
+   症状（用户报）：开着「文件 / 终端」面板时，面板顶部那个标签跟左上角侧栏的图标叠在一起。
+
+   实测：DockKit 的标签条左内边距默认只有 10px ——
+     ._tabStrip_…{ padding: 10px 6px 0 var(--dsh-dockkit-strip-inline-start, 10px) }
+   这个变量本来就是留给"窗口左上角有东西要避让"的场景（macOS 用它让开红黄绿三个灯）。
+   而本机左侧那条 side bar 在收起态是 56px 宽（MainActivity 里界面上那排图标
+   实测 x≈10..47dp），10px 的默认值不够 → 压在一起。
+
+   修法：窄屏下把这个变量设成侧栏宽度，标签条自然右移让开。 */
+@media (max-width: 640px) {
+  html {
+    --dsh-dockkit-strip-inline-start: 56px;
+  }
+}
+
+/* ============ 移动端软键盘与长按手势防冲突优化 (v1.34) ============ */
+/* 1. 消息文本允许长按复制，但按钮、图标、药丸标签与手势操作区禁止原生选中文本 */
+button,
+[role="button"],
+.icon-btn,
+[class*="_tabStrip_"],
+[class*="_trigger_"],
+[class*="_navCell_"],
+[class*="_crumb_"] {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* 2. 保证正文内容、代码块等依然可以顺畅选中文本与长按复制 */
+[class*="_message_"],
+[class*="_content_"],
+[class*="_markdown_"],
+pre, code {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+/* 3. 输入法软键盘顶起时：保证底栏与操作工具条紧凑不遮挡 */
+@media (max-height: 500px) and (orientation: landscape) {
+  [class*="_header_"] {
+    display: none !important;
+  }
+  [class*="_inputBar_"], [class*="_composer_"] {
+    padding-bottom: 4px !important;
+  }
+}
+
+/* ============ 设置页导航最终兜底（2026-10-21） ============
+   症状：设置页 9 个 tab 被排成两列，第 5 行（演示文稿）被内容区截掉，
+   内容整体被顶到屏幕下半。运行时插件 CSS 把 navList 设成了 grid，
+   原来只写 flex-direction:row 对 grid 无效（grid 不吃这个属性）。
+   这里用更高优先级强制回单行横向滚动，不再依赖插件 CSS 的写法。 */
+@media (max-width: 640px) {
+  html body .VOzbGW_overlay .VOzbGW_panel > .VOzbGW_nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  html body .VOzbGW_overlay .VOzbGW_panel .VOzbGW_nav .VOzbGW_navList {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    height: 32px !important;
+    max-height: 32px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+  html body .VOzbGW_overlay .VOzbGW_panel .VOzbGW_nav .VOzbGW_navList > * {
+    flex: 0 0 auto !important;
+    width: auto !important;
+  }
+  html body .VOzbGW_overlay .VOzbGW_panel .VOzbGW_options {
+    padding: 16px 16px max(40px, env(safe-area-inset-bottom, 40px)) !important;
+  }
+}
+
+/* ==========================================================================
+   DSH Mobile 2026.10 — full-bleed 16:9.5 layout
+   --------------------------------------------------------------------------
+   The shell is intentionally kept visually close to upstream DSH:
+   neutral surfaces, one blue accent, restrained borders and no decorative
+   chrome. The mobile adaptation only changes geometry and touch ergonomics.
+
+   Portrait target : 9.5:16 (for example 570 x 960 CSS px)
+   Landscape target: 16:9.5 (for example 960 x 570 CSS px)
+   ========================================================================== */
+
+@media (max-width: 1023px) {
+  :root {
+    --dsh-mobile-edge: clamp(6px, 1.45vw, 10px);
+    --dsh-mobile-header-height: 48px;
+    --dsh-mobile-radius: 20px;
+    --dsh-mobile-drawer-width: min(88vw, 360px);
+    --dsh-mobile-safe-top: env(safe-area-inset-top, 0px);
+    --dsh-mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  html {
+    background: var(--dsw-alias-bg-base);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--dsw-alias-label-primary);
+    background: var(--dsw-alias-bg-base);
+  }
+
+  /* The main grid is content-only. The sidebar is a true overlay drawer. */
+  .pI_x6G_frame {
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    grid-template-columns: 0 minmax(0, 1fr) 0 !important;
+    background: var(--dsw-alias-bg-base) !important;
+  }
+
+  .pI_x6G_frame::before {
+    background: none !important;
+  }
+
+  .pI_x6G_centerCol {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    background: var(--dsw-alias-bg-base) !important;
+  }
+
+  .pI_x6G_sidebarCol {
+    width: 0 !important;
+    min-width: 0 !important;
+    border-right: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .pI_x6G_rightbarCol {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+  }
+
+  /* Keep upstream DSH surface treatment instead of the old custom wallpaper. */
+  .pI_x6G_frame::before {
+    content: none !important;
+  }
+
+  .wSkVaW_root,
+  .wSkVaW_body,
+  .wSkVaW_embeddedBody {
+    background: var(--dsw-alias-bg-base) !important;
+  }
+
+  /* One compact, consistent app bar. */
+  .wSkVaW_header {
+    min-height: var(--dsh-mobile-header-height) !important;
+    height: var(--dsh-mobile-header-height) !important;
+    box-sizing: border-box !important;
+    grid-template-columns: 0 minmax(0, 1fr) !important;
+    align-items: center !important;
+    padding:
+      max(6px, var(--dsh-mobile-safe-top))
+      10px
+      6px
+      58px !important;
+    background: var(--dsw-alias-bg-base) !important;
+    border-bottom: 0 !important;
+  }
+
+  .wSkVaW_header:has(.wSkVaW_tabs) {
+    height: calc(var(--dsh-mobile-header-height) + 26px) !important;
+    min-height: calc(var(--dsh-mobile-header-height) + 26px) !important;
+    padding-bottom: 0 !important;
+  }
+
+  .wSkVaW_titleRow {
+    min-height: 32px !important;
+    padding-inline-start: 0 !important;
+  }
+
+  .wSkVaW_crumb {
+    max-width: min(58vw, 360px) !important;
+    padding: 4px 6px !important;
+    font-size: 13.5px !important;
+    line-height: 20px !important;
+  }
+
+  .wSkVaW_headerActions,
+  .wSkVaW_headerUtilities {
+    gap: 4px !important;
+  }
+
+  .wSkVaW_headerCorner {
+    margin-right: -4px !important;
+  }
+
+  .wSkVaW_headerCorner button {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+  }
+
+  .wSkVaW_tabs {
+    margin-top: 0 !important;
+    padding-left: 0 !important;
+    gap: 24px !important;
+  }
+
+  .wSkVaW_tab {
+    min-height: 30px !important;
+    padding-bottom: 7px !important;
+  }
+
+  /* Main content uses virtually the entire width. */
+  .wSkVaW_body {
+    --dsh-chat-content-width: calc(100vw - 16px) !important;
+    --dsh-composer-card-max-width: calc(100vw - 12px) !important;
+    --dsh-composer-side-clearance: 3px !important;
+    --dsh-composer-dock-inset: 3px !important;
+  }
+
+  .wSkVaW_embeddedBody {
+    --dsh-chat-content-width: min(calc(100vw - 20px), 920px) !important;
+    --dsh-composer-card-max-width: min(calc(100vw - 16px), 952px) !important;
+    --dsh-composer-side-clearance: 3px !important;
+    --dsh-composer-dock-inset: 3px !important;
+  }
+
+  .wSkVaW_scrollBody {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 var(--dsh-mobile-edge) !important;
+    scrollbar-gutter: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain;
+  }
+
+  .wSkVaW_viewArea,
+  .wSkVaW_heroOptions {
+    max-width: 100% !important;
+  }
+
+  /* Feed cards remain DSH-like but use the available reading width. */
+  [class*="_answer_"],
+  [class*="_markdown_"],
+  [class*="_message_"],
+  [class*="_toolCall_"],
+  [class*="_toolResult_"] {
+    max-width: 100% !important;
+  }
+
+  [class*="_block_"],
+  [class*="_output_"],
+  [class*="_command_"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Mobile launcher: a 44px target with a quiet upstream-style icon. */
+  .dsh-mobile-menu-btn {
+    top: calc(var(--dsh-mobile-safe-top) + 5px) !important;
+    left: 7px !important;
+    width: 44px !important;
+    height: 44px !important;
+    box-sizing: border-box !important;
+    border-radius: 14px !important;
+    color: var(--dsw-alias-label-secondary) !important;
+    background: color-mix(
+      in srgb,
+      var(--dsw-alias-bg-base) 78%,
+      transparent
+    ) !important;
+    backdrop-filter: blur(12px) saturate(130%);
+    transition:
+      background-color 120ms ease,
+      transform 120ms ease !important;
+  }
+
+  .dsh-mobile-menu-btn:active {
+    transform: scale(0.92) !important;
+    background: var(--dsw-alias-interactive-bg-hover) !important;
+  }
+
+  .dsh-mobile-menu-btn svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  /* Sidebar drawer: 360px maximum, compact 44px rows, native safe padding. */
+  .pI_x6G_sidebarCol[style*="position: fixed"],
+  body:has(.dsh-mobile-scrim) .pI_x6G_sidebarCol {
+    width: var(--dsh-mobile-drawer-width) !important;
+    max-width: var(--dsh-mobile-drawer-width) !important;
+    height: 100dvh !important;
+    border-right: 0.5px solid var(--dsw-alias-border-l2) !important;
+    box-shadow: 14px 0 44px rgba(0, 0, 0, 0.22) !important;
+    border-radius: 0 18px 18px 0 !important;
+    background: var(--dsw-specific-sidebar-fill) !important;
+    overflow: hidden !important;
+  }
+
+  .pI_x6G_sidebarCol[style*="position: fixed"] > div,
+  body:has(.dsh-mobile-scrim) .pI_x6G_sidebarCol > div {
+    display: flex !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 100% !important;
+    padding:
+      calc(var(--dsh-mobile-safe-top) + 8px)
+      10px
+      calc(var(--dsh-mobile-safe-bottom) + 8px) !important;
+    background: var(--dsw-specific-sidebar-fill) !important;
+  }
+
+  .pI_x6G_sidebarCol[style*="position: fixed"] > div > div[class*="_root"],
+  body:has(.dsh-mobile-scrim) .pI_x6G_sidebarCol > div > div[class*="_root"] {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .dsh-mobile-scrim {
+    background: rgba(5, 8, 15, 0.24) !important;
+    backdrop-filter: blur(2px);
+    animation: dsh-mobile-scrim-in 160ms ease-out both;
+  }
+
+  @keyframes dsh-mobile-scrim-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  [class*="_sidebarCol"] [class*="_newSession"],
+  [class*="_sidebarCol"] [class*="_panelRow"],
+  [class*="_sidebarCol"] [class*="_trigger"] {
+    min-height: 42px !important;
+    border-radius: 10px !important;
+  }
+
+  [class*="_sidebarCol"] button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Composer: full-width, high-use surface without a heavy floating-card look. */
+  .uV2eYG_root {
+    padding: 0 4px 6px !important;
+  }
+
+  .uV2eYG_hero {
+    padding: 0 4px !important;
+  }
+
+  .uV2eYG_card {
+    border-radius: var(--dsh-mobile-radius) !important;
+    box-shadow:
+      0 7px 24px rgba(0, 0, 0, 0.08),
+      0 0 0 0.5px var(--dsw-alias-border-l1) !important;
+  }
+
+  .uV2eYG_input {
+    min-height: 40px !important;
+    padding: 5px 10px 2px 14px !important;
+  }
+
+  .uV2eYG_row {
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    padding: 3px 6px 6px !important;
+  }
+
+  .uV2eYG_tools,
+  .uV2eYG_modes,
+  .uV2eYG_trailing {
+    gap: 6px !important;
+  }
+
+  .uV2eYG_select {
+    max-width: 31vw !important;
+  }
+
+  .uV2eYG_add {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .uV2eYG_primary {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .wSkVaW_root[data-phase="active"] .wSkVaW_composerSeat {
+    padding-bottom: var(--dsh-mobile-safe-bottom) !important;
+    background: linear-gradient(
+      180deg,
+      transparent 0,
+      var(--dsw-alias-bg-base) 22px
+    ) !important;
+  }
+
+  /* Hero uses upstream composition with a slightly tighter mobile rhythm. */
+  .wSkVaW_root[data-phase="hero"] .wSkVaW_composerHero {
+    padding-bottom: clamp(24px, 5vh, 52px) !important;
+  }
+
+  .wSkVaW_heroWorkspaceRow {
+    padding-inline: 4px !important;
+  }
+
+  /* Settings and dialogs behave like a native full-screen sheet. */
+  .VOzbGW_nav {
+    padding:
+      calc(var(--dsh-mobile-safe-top) + 7px)
+      54px
+      7px
+      10px !important;
+    min-height: 48px !important;
+  }
+
+  .VOzbGW_options {
+    padding:
+      12px
+      12px
+      calc(var(--dsh-mobile-safe-bottom) + 22px) !important;
+  }
+
+  [role="dialog"] {
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100dvh - 16px) !important;
+    border-radius: 18px !important;
+  }
+
+  /* Landscape 16:9.5: preserve reading measure while keeping every edge useful. */
+  @media (orientation: landscape) and (max-height: 640px) {
+    :root {
+      --dsh-mobile-header-height: 42px;
+      --dsh-mobile-drawer-width: min(52vw, 360px);
+    }
+
+    .wSkVaW_body {
+      --dsh-chat-content-width: min(calc(100vw - 32px), 840px) !important;
+      --dsh-composer-card-max-width: min(calc(100vw - 24px), 860px) !important;
+    }
+
+    .wSkVaW_header {
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
+    }
+
+    .wSkVaW_root[data-phase="hero"] .wSkVaW_composerHero {
+      padding-bottom: 16px !important;
+    }
+
+    .uV2eYG_hero .uV2eYG_input {
+      min-height: 38px !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dsh-mobile-scrim,
+    .dsh-mobile-menu-btn {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+/* The update notice follows the same quiet surface language as DSH menus. */
+@media (max-width: 1023px) {
+  .dsh-update-banner {
+    top: calc(var(--dsh-mobile-safe-top) + 4px);
+    right: 8px;
+    left: 58px;
+    min-height: 42px;
+    padding: 8px 8px 8px 12px;
+    border: 0.5px solid var(--dsw-alias-border-l1);
+    border-radius: 13px;
+    color: var(--dsw-alias-label-primary);
+    background: var(--dsw-specific-menu, var(--dsw-alias-bg-layer-2));
+    box-shadow: var(--dsw-elevation-prominent, 0 8px 28px rgba(0, 0, 0, 0.18));
+    backdrop-filter: var(--dsw-menu-backdrop-filter, blur(18px));
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .dsh-update-banner__close {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    color: var(--dsw-alias-label-secondary);
+    background: var(--dsw-alias-interactive-bg-hover);
+  }
+
+  .dsh-update-banner__close:active {
+    background: var(--dsw-alias-interactive-bg-hover-solid);
+  }
+}
+
