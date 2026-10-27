@@ -98,6 +98,8 @@ jobs:
 
           grep -F "https://api.github.com/repos/${{ github.repository }}/releases/latest" \
             upstream/android-app/src/com/deepseek/harness/MainActivity.java
+          grep -F "systemFontScale" \
+            upstream/android-app/src/com/deepseek/harness/MainActivity.java
 
           cp ui/mobile.css "$UI_DIST/mobile.css"
           cp ui/mobile.js "$UI_DIST/mobile.js"
