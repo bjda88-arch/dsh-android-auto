@@ -69,6 +69,28 @@ def main() -> None:
         "        ws.setTextZoom(Math.max(85, Math.min(150, systemFontScale)));\n",
     )
 
+    text = replace_once(
+        text,
+        "        ws.setSupportZoom(false);\n"
+        "        ws.setBuiltInZoomControls(false);\n",
+        "        ws.setSupportZoom(true);\n"
+        "        ws.setBuiltInZoomControls(true);\n",
+    )
+
+    text = replace_once(
+        text,
+        '        final String body = html.replace("<body>", "<body class=\\"clean\\">");\n',
+        '        final String bootTheme = themePrefersDark() ? "dark" : "light";\n'
+        '        final String body = html.replace("<body>", '
+        '"<body class=\\"clean\\" data-theme=\\"" + bootTheme + "\\">");\n',
+    )
+
+    text = replace_once(
+        text,
+        "        webView.setBackgroundColor(0xFF04050A);\n",
+        "        webView.setBackgroundColor(themePrefersDark() ? 0xFF151517 : 0xFFFFFFFF);\n",
+    )
+
     args.main_activity.write_text(text, encoding="utf-8")
 
 
