@@ -37,8 +37,12 @@ jobs:
           APP_VERSION: ${{ steps.status.outputs.desired_app_version }}
           UPSTREAM_VERSION: ${{ steps.status.outputs.official_version }}
         run: |
-          major_minor=$(echo "$PORT_TAG" | sed -E 's/^v([0-9]+)\.([0-9]+).*/\1\2/')
-          app_code=$((10#$major_minor * 100 + 1))
+          core="${PORT_TAG#v}"
+          core="${core%%-*}"
+          IFS=. read -r major minor patch <<< "$core"
+          patch="${patch:-0}"
+          patch="${patch%%[!0-9]*}"
+          app_code=$((10#$major * 100000000 + 10#$minor * 1000000 + 10#$patch * 10000 + 1))
           gh workflow run build-release.yml \
             --repo "${{ github.repository }}" \
             -f port_tag="$PORT_TAG" \
