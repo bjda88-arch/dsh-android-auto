@@ -3,7 +3,7 @@
 This repository builds a private-signing Android release of DeepSeek Harness and
 follows the official DeepSeek Harness release feed.
 
-Current release: `v1.45.4`, with DSH `0.2.1-rc.2`.
+Current release: `v1.45.5`, with DSH `0.2.1-rc.2`.
 
 | Portrait 16:9.5 | Landscape 16:9.5 | Navigation drawer |
 | --- | --- | --- |
