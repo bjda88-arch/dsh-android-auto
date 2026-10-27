@@ -1,433 +1,327 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#04050A">
-<title>DeepSeek Harness · Concept Film</title>
-<style>
-:root{
-  --ink:#F2F3F7;
-  --dim:rgba(242,243,247,.46);
-  --hair:rgba(255,255,255,.10);
-  --blue:#4D6BFE;
-  --cyan:#7FE6FF;
-  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei",sans-serif;
-  --mono:ui-monospace,"SF Mono","Roboto Mono","JetBrains Mono",Menlo,Consolas,monospace;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;background:#000;overflow:hidden;-webkit-tap-highlight-color:transparent}
-body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(120% 70% at 50% 28%,#080A14 0%,#05060C 46%,#04050A 100%)}
-#stage{position:relative;flex:none;width:1080px;height:1920px;overflow:hidden;background:transparent;
-  transform-origin:center center}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff">
+  <title>DeepSeek Harness</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --text: #0f1115;
+      --secondary: #61666b;
+      --tertiary: #81858c;
+      --line: rgba(0, 0, 0, 0.12);
+      --track: rgba(0, 0, 0, 0.08);
+      --accent: #4176e6;
+      --font: -apple-system, BlinkMacSystemFont, "PingFang SC",
+        "HarmonyOS Sans SC", "Noto Sans CJK SC", "Microsoft YaHei",
+        sans-serif;
+    }
 
-/* ---------- atmosphere ---------- */
-.amb{position:absolute;inset:0;opacity:.22}
-.glow{position:absolute;left:50%;pointer-events:none;filter:blur(26px);opacity:0}
-.g-brand{top:700px;width:1240px;height:760px;transform:translate(-50%,-50%);
-  background:radial-gradient(closest-side,rgba(77,107,254,.26),rgba(77,107,254,.06) 58%,transparent 74%)}
-.g-card{top:1000px;width:1400px;height:900px;transform:translate(-50%,-50%);
-  background:radial-gradient(closest-side,rgba(70,120,255,.16),rgba(40,60,160,.05) 60%,transparent 76%)}
-.g-title{top:900px;width:1300px;height:820px;transform:translate(-50%,-50%);
-  background:radial-gradient(closest-side,rgba(77,107,254,.22),transparent 72%)}
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --bg: #151517;
+        --text: #f9fafb;
+        --secondary: #cfd3d6;
+        --tertiary: #adb2b8;
+        --line: rgba(255, 255, 255, 0.12);
+        --track: rgba(255, 255, 255, 0.1);
+        --accent: #7aaaff;
+      }
+    }
 
-.grid{position:absolute;inset:0;opacity:0;
-  background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),
-                   linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);
-  background-size:90px 90px;
-  -webkit-mask-image:radial-gradient(68% 44% at 50% 53%,#000 0%,rgba(0,0,0,.55) 52%,transparent 80%);
-  mask-image:radial-gradient(68% 44% at 50% 53%,#000 0%,rgba(0,0,0,.55) 52%,transparent 80%)}
+    body[data-theme="light"] {
+      color-scheme: light;
+      --bg: #ffffff;
+      --text: #0f1115;
+      --secondary: #61666b;
+      --tertiary: #81858c;
+      --line: rgba(0, 0, 0, 0.12);
+      --track: rgba(0, 0, 0, 0.08);
+      --accent: #4176e6;
+    }
 
-.vig{position:fixed;inset:0;pointer-events:none;
-  background:radial-gradient(130% 86% at 50% 44%,rgba(0,0,0,0) 38%,rgba(0,0,0,.42) 76%,rgba(0,0,0,.72) 100%)}
-.grain{position:fixed;inset:-20%;pointer-events:none;opacity:.05;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E")}
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #151517;
+      --text: #f9fafb;
+      --secondary: #cfd3d6;
+      --tertiary: #adb2b8;
+      --line: rgba(255, 255, 255, 0.12);
+      --track: rgba(255, 255, 255, 0.1);
+      --accent: #7aaaff;
+    }
 
-.flare{position:absolute;left:50%;top:753px;width:1500px;height:1px;opacity:0;pointer-events:none;
-  transform:translate(-50%,-50%) scaleX(.25);
-  background:linear-gradient(90deg,transparent,rgba(77,107,254,.55) 28%,rgba(198,212,255,.95) 50%,rgba(77,107,254,.55) 72%,transparent);
-  filter:blur(.6px)}
-/* ---------- brand ---------- */
-.brandPos{position:absolute;left:0;top:0;width:500px;transform-origin:0 0;transform:translate(290px,700px)}
-.brandIn{opacity:0}
-.brandIn img{display:block;width:100%;height:auto;filter:drop-shadow(0 0 46px rgba(77,107,254,.40))}
-.brandLine{position:absolute;left:50%;top:calc(100% + 28px);height:1px;width:0;transform:translateX(-50%);
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent)}
-.harnessBig{position:absolute;left:0;right:0;top:862px;text-align:center;opacity:0;
-  font-family:var(--mono);font-size:29px;letter-spacing:.62em;padding-left:.62em;
-  color:rgba(242,243,247,.82);font-weight:400}
-.cornerName{position:absolute;left:306px;top:104px;opacity:0;
-  font-family:var(--mono);font-size:17px;letter-spacing:.46em;color:rgba(242,243,247,.42)}
+    * {
+      box-sizing: border-box;
+    }
 
-/* ---------- card ---------- */
-.card{position:absolute;left:100px;top:700px;width:880px;height:2px;border-radius:44px;opacity:0;
-  overflow:hidden;
-  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.028));
-  border:1px solid rgba(255,255,255,.13);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 50px 140px rgba(0,0,0,.55),0 0 90px rgba(77,107,254,.10);
-  -webkit-backdrop-filter:blur(26px) saturate(140%);backdrop-filter:blur(26px) saturate(140%)}
-.slit{position:absolute;left:100px;top:979px;width:880px;height:2px;opacity:0;
-  background:linear-gradient(90deg,transparent,rgba(140,165,255,.95) 30%,#fff 50%,rgba(140,165,255,.95) 70%,transparent);
-  filter:blur(1.5px)}
-.tick{position:absolute;width:26px;height:26px;opacity:0;border-color:rgba(255,255,255,.20);border-style:solid;border-width:0}
-.tick.tl{left:88px;top:688px;border-left-width:1px;border-top-width:1px}
-.tick.tr{left:966px;top:688px;border-right-width:1px;border-top-width:1px}
-.tick.bl{left:88px;top:1244px;border-left-width:1px;border-bottom-width:1px}
-.tick.br{left:966px;top:1244px;border-right-width:1px;border-bottom-width:1px}
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+    }
 
-.cHead{position:absolute;left:64px;right:64px;top:56px;display:flex;justify-content:space-between;align-items:baseline;opacity:0}
-.cHead b{font-family:var(--mono);font-weight:400;font-size:20px;letter-spacing:.30em;color:rgba(242,243,247,.86)}
-.cHead i{font-family:var(--mono);font-style:normal;font-size:18px;letter-spacing:.18em;color:rgba(242,243,247,.36)}
-.cDiv{position:absolute;left:64px;right:64px;top:130px;height:1px;background:rgba(255,255,255,.10);transform-origin:0 50%;transform:scaleX(0)}
-.mUser{position:absolute;right:64px;top:196px;font-size:33px;font-weight:300;letter-spacing:.01em;color:rgba(242,243,247,.52);opacity:0}
-.sysline{position:absolute;left:64px;top:262px;display:flex;align-items:center;gap:14px;opacity:0;
-  font-family:var(--mono);font-size:17px;letter-spacing:.06em;color:rgba(242,243,247,.52)}
-.sysline .dot{flex:none;width:6px;height:6px;background:var(--blue);box-shadow:0 0 12px rgba(77,107,254,.85)}
-.scaret{flex:none;width:2px;height:20px;background:rgba(242,243,247,.55);animation:blink 1s steps(1,end) infinite;transition:opacity .25s ease}
-.scaret.typing{animation:none;opacity:1}
-.scaret.off{opacity:0}
-.flash{position:absolute;inset:0;border-radius:44px;border:1px solid rgba(150,175,255,.55);opacity:0;pointer-events:none}
-.mAi{position:absolute;left:64px;top:318px;display:flex;align-items:flex-end;gap:16px;opacity:0}
-.mAi span{font-size:56px;font-weight:300;letter-spacing:.02em;color:#fff}
-.caret{width:3px;height:50px;margin-bottom:10px;background:var(--blue);opacity:0}
-.cFoot{position:absolute;left:64px;right:64px;bottom:54px;display:flex;justify-content:space-between;
-  font-family:var(--mono);font-size:17px;letter-spacing:.16em;color:rgba(242,243,247,.38);opacity:0}
-.cFoot .hi{color:rgba(242,243,247,.62)}
-.sweep{position:absolute;top:-1px;left:0;width:280px;height:1px;opacity:0;
-  background:linear-gradient(90deg,transparent,rgba(150,175,255,.95),transparent)}
+    body {
+      color: var(--text);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      transition: background-color 160ms ease, color 160ms ease;
+    }
 
-/* side meta */
-.meta{position:absolute;left:96px;top:1652px;opacity:0;font-family:var(--mono);font-size:16px;
-  line-height:2.1;letter-spacing:.24em;color:rgba(242,243,247,.30)}
-.meta b{font-weight:400;color:rgba(242,243,247,.60)}
+    #app {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding:
+        max(24px, env(safe-area-inset-top))
+        max(24px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom))
+        max(24px, env(safe-area-inset-left));
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 160ms ease, transform 180ms cubic-bezier(.23, 1, .32, 1);
+    }
 
-/* ---------- title ---------- */
-.titleBlock{position:absolute;left:0;right:0;top:756px;text-align:center}
-.t1{font-size:118px;font-weight:200;letter-spacing:.16em;padding-left:.16em;color:#fff;opacity:0;
-  text-shadow:0 0 70px rgba(77,107,254,.30)}
-.t2{margin-top:34px;font-family:var(--mono);font-size:28px;letter-spacing:.86em;padding-left:.86em;
-  color:rgba(242,243,247,.66);opacity:0}
-.rule{width:0;height:1px;margin:44px auto 0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.36),transparent)}
-.t3{margin-top:42px;font-size:33px;font-weight:300;letter-spacing:.04em;color:rgba(242,243,247,.60);opacity:0}
-.t4{position:absolute;left:0;right:0;top:1728px;text-align:center;font-family:var(--mono);
-  font-size:15px;letter-spacing:.40em;color:rgba(242,243,247,.26);opacity:0}
+    .content {
+      width: min(240px, 64vw);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-.endfade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:20;
-  transition:opacity 1.30s ease}
-body.done .endfade{opacity:1}
-body.done .hint{opacity:1;transition:opacity .70s ease .50s}
-.hint{transition:opacity .30s ease}
+    .mark {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      color: var(--text);
+      opacity: 0;
+      transform: scale(.96);
+      animation: mark-in 240ms cubic-bezier(.23, 1, .32, 1) 30ms forwards;
+    }
 
-/* ---------- boot progress ---------- */
-.boot{position:absolute;left:50%;top:1156px;width:560px;transform:translateX(-50%);opacity:0}
-.bStages{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;
-  letter-spacing:.26em;color:rgba(242,243,247,.24)}
-.bStages i{font-style:normal;transition:color .50s ease}
-.bStages i.on{color:rgba(242,243,247,.94)}
-.bStages i.dn{color:rgba(242,243,247,.52)}
-.bTrack{position:relative;margin-top:30px;height:2px;background:rgba(255,255,255,.09)}
-.bFill{position:absolute;left:0;top:0;height:2px;width:0;overflow:hidden;
-  background:linear-gradient(90deg,rgba(96,124,255,.80),rgba(186,204,255,.96) 72%,#fff);
-  box-shadow:0 0 18px rgba(77,107,254,.50)}
-.bFill em{position:absolute;top:0;left:-170px;width:170px;height:2px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.90),transparent);
-  animation:shim 2.40s linear infinite}
-@keyframes shim{from{transform:translateX(0)}to{transform:translateX(740px)}}
-.bHead{position:absolute;top:-3px;left:0;width:8px;height:8px;margin-left:-4px;border-radius:50%;
-  background:#fff;box-shadow:0 0 20px 2px rgba(150,175,255,.85);opacity:0;transition:opacity .40s ease}
-.bRow{margin-top:26px;display:flex;justify-content:space-between;align-items:baseline;
-  font-family:var(--mono);font-size:15px;letter-spacing:.13em;color:rgba(242,243,247,.42)}
-.bRow b{font-weight:400;color:rgba(242,243,247,.88)}
-.bRow .eta{font-variant-numeric:tabular-nums;color:rgba(242,243,247,.62)}
-@keyframes bootIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
-body.run .boot{animation:bootIn .95s cubic-bezier(.16,1,.3,1) 17.30s both}
-.progress{position:absolute;left:0;bottom:0;height:1px;width:100%;transform:scaleX(0);transform-origin:0 50%;
-  background:rgba(255,255,255,.20);z-index:11}
-.hint{position:absolute;left:0;right:0;bottom:72px;text-align:center;font-family:var(--mono);
-  font-size:14px;letter-spacing:.44em;color:rgba(242,243,247,.40);opacity:0;z-index:12}
-.vig,.grain{z-index:9}
+    .mark svg {
+      width: 54px;
+      height: 54px;
+      display: block;
+    }
 
-/* ================= timeline ================= */
-body.run .g-brand{animation:glowBrand 9s ease 0.15s both}
-@keyframes glowBrand{0%{opacity:0}18%{opacity:.95}62%{opacity:.85}100%{opacity:.30}}
+    h1 {
+      margin: 15px 0 0;
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 26px;
+      letter-spacing: .01em;
+      text-align: center;
+    }
 
-body.run .flare{animation:flareIn 1.70s cubic-bezier(.16,1,.3,1) 1.25s both}
-@keyframes flareIn{0%{opacity:0;transform:translate(-50%,-50%) scaleX(.22)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scaleX(1.18)}}
+    .phase {
+      min-height: 20px;
+      margin: 5px 0 0;
+      color: var(--secondary);
+      font-size: 13px;
+      line-height: 20px;
+      text-align: center;
+    }
 
-body.run .brandIn{animation:fadeBrand 1.30s cubic-bezier(.16,1,.3,1) .45s both}
-@keyframes fadeBrand{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+    .track {
+      width: 100%;
+      height: 2px;
+      margin-top: 22px;
+      overflow: hidden;
+      border-radius: 2px;
+      background: var(--track);
+    }
 
-body.run .brandPos{animation:brandToCorner 1.05s cubic-bezier(.6,.02,.2,1) 3.40s both,
-                                fadeAway .70s ease 13.40s forwards}
-@keyframes brandToCorner{
-  from{transform:translate(290px,700px) scale(1);opacity:1}
-  to{transform:translate(88px,96px) scale(.40);opacity:.72}
-}
+    .fill {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 180ms ease-out;
+    }
 
-body.run .brandLine{animation:lineGrow .80s cubic-bezier(.16,1,.3,1) 2.10s both}
-@keyframes lineGrow{from{width:0;opacity:0}60%{opacity:1}to{width:168px;opacity:1}}
+    .meta {
+      width: 100%;
+      min-height: 18px;
+      margin-top: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--tertiary);
+      font-size: 11.5px;
+      line-height: 18px;
+      font-variant-numeric: tabular-nums;
+    }
 
-body.run .harnessBig{animation:harnessIn .90s cubic-bezier(.16,1,.3,1) 2.46s both,
-                                harnessOut .45s ease 3.92s forwards}
-@keyframes harnessIn{from{opacity:0;transform:translateY(10px);letter-spacing:.62em}to{opacity:1;transform:none;letter-spacing:.86em}}
-@keyframes harnessOut{from{opacity:1}to{opacity:0}}
+    .detail {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-body.run .cornerName{animation:fadeUp .70s cubic-bezier(.16,1,.3,1) 4.24s both,
-                                fadeAway .70s ease 13.40s forwards}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes fadeAway{from{opacity:1}to{opacity:0}}
+    .percent {
+      flex: none;
+      color: var(--secondary);
+    }
 
-body.run .grid{animation:gridIn 1.30s ease 3.80s both}
-body.run .amb{animation:ambOn 2.30s cubic-bezier(.16,1,.3,1) 9.28s forwards}
-@keyframes ambOn{from{opacity:.22}to{opacity:1}}
-@keyframes gridIn{from{opacity:0}to{opacity:1}}
-@keyframes gridDim{from{opacity:1}to{opacity:.4}}
+    @keyframes mark-in {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
 
-body.run .g-card{animation:glowCard 1.60s ease 4.90s both, glowOut 1.20s ease 12.60s forwards}
-@keyframes glowCard{from{opacity:0}to{opacity:1}}
-@keyframes glowOut{from{opacity:1}to{opacity:0}}
+    body.done #app {
+      opacity: 0;
+      transform: translateY(-2px);
+    }
 
-body.run .meta{animation:fadeUp .80s cubic-bezier(.16,1,.3,1) 4.62s both, fadeAway .60s ease 12.20s forwards}
-
-body.run .card{animation:cardOpen 1.40s cubic-bezier(.18,.9,.24,1) 5.00s both,
-                          cardOut 1.25s cubic-bezier(.5,0,.75,0) 13.00s forwards}
-@keyframes cardOpen{
-  0%{height:2px;opacity:0;transform:translateY(0)}
-  10%{opacity:1}
-  100%{height:560px;opacity:1;transform:translateY(0)}
-}
-@keyframes cardOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-26px) scale(.94)}}
-
-body.run .slit{animation:slitOut 1.55s ease 5.00s both}
-@keyframes slitOut{0%{opacity:0;transform:scaleX(.6)}18%{opacity:1;transform:scaleX(1)}70%{opacity:.6}100%{opacity:0}}
-
-body.run .tick{animation:tickIn .70s ease 5.70s both, fadeAway .60s ease 12.70s forwards}
-@keyframes tickIn{from{opacity:0}to{opacity:1}}
-
-body.run .cHead{animation:fadeUp .80s cubic-bezier(.16,1,.3,1) 6.24s both, fadeAway .50s ease 12.60s forwards}
-body.run .cDiv{animation:divGrow .85s cubic-bezier(.16,1,.3,1) 6.40s both, fadeAway .50s ease 12.60s forwards}
-@keyframes divGrow{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
-
-body.run .mUser{animation:msgIn .55s cubic-bezier(.16,1,.3,1) 6.95s both, fadeAway .50s ease 12.60s forwards}
-body.run .sysline{animation:fadeUp .40s ease 7.78s both, fadeAway .50s ease 12.60s forwards}
-body.run .flash{animation:flashPulse .90s ease 9.35s both}
-@keyframes flashPulse{0%{opacity:0}22%{opacity:.85}100%{opacity:0}}
-body.run .mAi{animation:aiIn 1.00s cubic-bezier(.16,1,.3,1) 9.35s both, fadeAway .50s ease 12.60s forwards}
-@keyframes msgIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes aiIn{from{opacity:0;transform:translateY(18px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
-
-body.run .caret{animation:caretIn .30s ease 9.75s both, blink 1.15s steps(1,end) 9.75s infinite, fadeAway .40s ease 12.50s forwards}
-@keyframes caretIn{from{opacity:0}to{opacity:1}}
-@keyframes blink{0%,54%{opacity:1}55%,100%{opacity:.05}}
-
-body.run .cFoot{animation:fadeUp .85s cubic-bezier(.16,1,.3,1) 10.70s both, fadeAway .50s ease 12.60s forwards}
-
-body.run .sweep{animation:sweepGo 1.70s cubic-bezier(.4,0,.2,1) 11.50s both}
-@keyframes sweepGo{0%{opacity:0;transform:translateX(-280px)}12%{opacity:1}88%{opacity:1}100%{opacity:0;transform:translateX(880px)}}
-
-/* title scene */
-body.run .g-title{animation:titleGlow 4.40s ease 13.90s both}
-@keyframes titleGlow{0%{opacity:0}32%{opacity:1}100%{opacity:.55}}
-
-body.run .t1{animation:titleIn 1.35s cubic-bezier(.16,1,.3,1) 14.30s both}
-@keyframes titleIn{from{opacity:0;transform:translateY(20px);filter:blur(10px)}to{opacity:1;transform:none;filter:blur(0)}}
-body.run .t2{animation:titleIn 1.10s cubic-bezier(.16,1,.3,1) 15.46s both}
-body.run .rule{animation:ruleGrow 1.00s cubic-bezier(.16,1,.3,1) 15.92s both}
-@keyframes ruleGrow{from{width:0;opacity:0}to{width:300px;opacity:1}}
-body.run .t3{animation:fadeUp 1.00s cubic-bezier(.16,1,.3,1) 16.44s both}
-body.run .t4{animation:fadeUp 1.00s cubic-bezier(.16,1,.3,1) 17.24s both}
-
-body.run .progress{animation:prog 17.2s linear 0s both}
-@keyframes prog{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-
-body.clean .progress,body.clean .hint{display:none}
-@media (prefers-reduced-motion:reduce){.grain{display:none}}
-</style>
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
 </head>
 <body>
-<div id="wrap">
-  <div id="stage">
-    <div class="amb">
-      <div class="glow g-brand"></div>
-      <div class="glow g-card"></div>
-      <div class="grid"></div>
-    </div>
-    <div class="glow g-title"></div>
-
-    <div class="flare"></div>
-    <div class="brandPos">
-      <div class="brandIn">
-        <img alt="DeepSeek" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTYuODEgNDEuMzYiIHdpZHRoPSI5MDAiIGhlaWdodD0iMTg5LjEiPjxnIGZpbGw9IiNGRkZGRkYiIGZpbGwtcnVsZT0ibm9uemVybyI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTAuOTkyLC00LjM0Mikgc2NhbGUoMC45OTE3KSI+PHBhdGggZD0iTTQ4LjgzNTQgMTAuMDQ3OUM0OC4zMjMyIDkuNzkxOTkgNDguMTAyNSAxMC4yNzk4IDQ3LjgwMzIgMTAuNTI3OEM0Ny43MDA3IDEwLjYwNzkgNDcuNjE0MyAxMC43MTE5IDQ3LjUyNzMgMTAuODA3NkM0Ni43NzkzIDExLjYyNCA0NS45MDQ4IDEyLjE1OTcgNDQuNzYyMiAxMi4wOTU3QzQzLjA5MjMgMTIgNDEuNjY2IDEyLjUzNTYgNDAuNDA1OCAxMy44Mzk4QzQwLjEzNzcgMTIuMjMxOSAzOS4yNDc2IDExLjI3MiAzNy44OTI2IDEwLjY1NThDMzcuMTgzNiAxMC4zMzU5IDM2LjQ2NjggMTAuMDE1NiAzNS45NzAyIDkuMzE5ODJDMzUuNjIzNSA4LjgyMzczIDM1LjUyOTMgOC4yNzE5NyAzNS4zNTYgNy43Mjc1NEMzNS4yNDU2IDcuMzk5OSAzNS4xMzUzIDcuMDYzOTYgMzQuNzY1MSA3LjAwNzgxQzM0LjM2MzMgNi45NDM4NSAzNC4yMDU2IDcuMjg3NiAzNC4wNDc5IDcuNTc1NjhDMzMuNDE4IDguNzUxOTUgMzMuMTczMyAxMC4wNDc5IDMzLjE5NzMgMTEuMzU5OUMzMy4yNTI0IDE0LjMxMiAzNC40NzM2IDE2LjY2NDEgMzYuODk5OSAxOC4zMzU5QzM3LjE3NTggMTguNTI3OCAzNy4yNDY2IDE4LjcxOTcgMzcuMTU5NyAxOUMzNi45OTQ2IDE5LjU3NTcgMzYuNzk3NCAyMC4xMzU3IDM2LjYyNCAyMC43MTE5QzM2LjUxMzcgMjEuMDgwMSAzNi4zNDg2IDIxLjE1OTcgMzUuOTYyNCAyMUMzNC42MzA5IDIwLjQzMjEgMzMuNDgxIDE5LjU5MTggMzIuNDY0NCAxOC41NzU3QzMwLjczOTMgMTYuODcyMSAyOS4xNzkyIDE0Ljk5MTcgMjcuMjMzNCAxMy41MkMyNi43NzY0IDEzLjE3NTggMjYuMzE5MyAxMi44NTYgMjUuODQ2NyAxMi41NTE4QzIzLjg2MTggMTAuNTg0IDI2LjEwNjkgOC45Njc3NyAyNi42MjcgOC43NzU4OEMyNy4xNzA0IDguNTc1NjggMjYuODE1OSA3Ljg4NzcgMjUuMDU5MSA3Ljg5NkMyMy4zMDIyIDcuOTAzODEgMjEuNjk1MyA4LjUwMzkxIDE5LjY0NyA5LjMwMzcxQzE5LjM0NzcgOS40MjM4MyAxOS4wMzIyIDkuNTExNzIgMTguNzA5NSA5LjU4Mzk4QzE2Ljg1MDEgOS4yMjM2MyAxNC45MTk5IDkuMTQzNTUgMTIuOTAzMyA5LjM3NTk4QzkuMTA1OTYgOS44MDc2MiA2LjA3Mjc1IDExLjYzOTYgMy44NDMyNiAxNC43NjgxQzEuMTY0NTUgMTguNTI3OCAwLjUzNDE4IDIyLjc5OTggMS4zMDY2NCAyNy4yNTU5QzIuMTE3NjggMzEuOTUyMSA0LjQ2NTgyIDM1LjgzOTggOC4wNzM3MyAzOC44Nzk5QzExLjgxNTkgNDIuMDMyMiAxNi4xMjU1IDQzLjU3NjIgMjEuMDQxIDQzLjI4MDNDMjQuMDI2OSA0My4xMDQgMjcuMzUxNiA0Mi42OTYzIDMxLjEwMTYgMzkuNDU2MUMzMi4wNDY5IDM5LjkzNiAzMy4wMzk2IDQwLjEyNzkgMzQuNjg2IDQwLjI3MkMzNS45NTQ2IDQwLjM5MjEgMzcuMTc1OCA0MC4yMDggMzguMTIxMSA0MC4wMDc4QzM5LjYwMjEgMzkuNjg4IDM5LjQ5OTUgMzguMjg4MSAzOC45NjM5IDM4LjAzMjJDMzQuNjIzIDM1Ljk2NzggMzUuNTc2MiAzNi44MDgxIDM0LjcxIDM2LjEyNzlDMzYuOTE1NSAzMy40NjM5IDQwLjI0MDIgMzAuNjk1OCA0MS41NCAyMS43MjhDNDEuNjQyNiAyMS4wMTYxIDQxLjU1NTcgMjAuNTY3OSA0MS41NCAxOS45OTE3QzQxLjUzMjIgMTkuNjM5NiA0MS42MTA4IDE5LjUwMzkgNDIuMDA0OSAxOS40NjM5QzQzLjA5MjMgMTkuMzM1OSA0NC4xNDc5IDE5LjAzMTcgNDUuMTE2NyAxOC40ODc4QzQ3LjkyOTIgMTYuOTE5OSA0OS4wNjQgMTQuMzQzOCA0OS4zMzE1IDExLjI1NTlDNDkuMzcxMSAxMC43ODM3IDQ5LjMyMzcgMTAuMjk1OSA0OC44MzU0IDEwLjA0NzlaTTI0LjMyNjIgMzcuODM5OEMyMC4xMTk2IDM0LjQ2MzkgMTguMDc5MSAzMy4zNTIxIDE3LjIzNTggMzMuMzk5OUMxNi40NDgyIDMzLjQ0ODIgMTYuNTg5OCAzNC4zNjgyIDE2Ljc2MzIgMzQuOTY3OEMxNi45NDQzIDM1LjU2MDEgMTcuMTgxMiAzNS45NjgzIDE3LjUxMTcgMzYuNDg3OEMxNy43NDAyIDM2LjgzMiAxNy44OTc5IDM3LjM0NDIgMTcuMjgzMiAzNy43MjhDMTUuOTI4MiAzOC41ODQgMTMuNTcyOCAzNy40Mzk5IDEzLjQ2MjQgMzcuMzgzOEMxMC43MjA3IDM1LjczNTggOC40MjgyMiAzMy41NjAxIDYuODEzNDggMzAuNTg0QzUuMjUzNDIgMjcuNzE5NyA0LjM0NzY2IDI0LjY0NzkgNC4xOTc3NSAyMS4zNjc3QzQuMTU4MiAyMC41NzU3IDQuMzg2NzIgMjAuMjk1OSA1LjE1ODY5IDIwLjE1MTlDNi4xNzUyOSAxOS45NiA3LjIyMzE0IDE5LjkxOTkgOC4yMzkyNiAyMC4wNzE4QzEyLjUzMjcgMjAuNzExOSAxNi4xODg1IDIyLjY3MTkgMTkuMjUyOSAyNS43NzU5QzIxLjAwMiAyNy41NDM5IDIyLjMyNTIgMjkuNjU1OCAyMy42ODg1IDMxLjcyMDJDMjUuMTM3NyAzMy45MTIxIDI2LjY5NzggMzYgMjguNjgzMSAzNy43MTE5QzI5LjM4NDMgMzguMzEyIDI5Ljk0MzQgMzguNzY4MSAzMC40NzkgMzkuMTA0QzI4Ljg2NDMgMzkuMjg4MSAyNi4xNjk5IDM5LjMyODEgMjQuMzI2MiAzNy44Mzk4Wk0yNi4zNDMzIDI0LjYwMDFDMjYuMzQzMyAyNC4yNDggMjYuNjE5MSAyMy45Njc4IDI2Ljk2NTggMjMuOTY3OEMyNy4wNDQ0IDIzLjk2NzggMjcuMTE1MiAyMy45ODM5IDI3LjE3ODIgMjQuMDA3OEMyNy4yNjUxIDI0LjA0IDI3LjM0MzggMjQuMDg3OSAyNy40MDY3IDI0LjE2MDJDMjcuNTE3MSAyNC4yNzIgMjcuNTgwMSAyNC40MzIxIDI3LjU4MDEgMjQuNjAwMUMyNy41ODAxIDI0Ljk1MjEgMjcuMzA0MiAyNS4yMzE5IDI2Ljk1NzUgMjUuMjMxOUMyNi42MTA4IDI1LjIzMTkgMjYuMzQzMyAyNC45NTIxIDI2LjM0MzMgMjQuNjAwMVpNMzIuNjA2NCAyNy44Nzk5QzMyLjIwNDYgMjguMDQ3OSAzMS44MDI3IDI4LjE5MTkgMzEuNDE2NSAyOC4yMDhDMzAuODE3OSAyOC4yMzk3IDMwLjE2NDEgMjcuOTkyMiAyOS44MDk2IDI3LjY4OEMyOS4yNTgzIDI3LjIxNTggMjguODY0MyAyNi45NTIxIDI4LjY5ODcgMjYuMTI3OUMyOC42Mjc5IDI1Ljc3NTkgMjguNjY3NSAyNS4yMzE5IDI4LjczMDUgMjQuOTE5OUMyOC44NzIxIDI0LjI0OCAyOC43MTQ0IDIzLjgxNTkgMjguMjQ5NSAyMy40MjM4QzI3Ljg3MTYgMjMuMTA0IDI3LjM5MTEgMjMuMDE2MSAyNi44NjMzIDIzLjAxNjFDMjYuNjY2IDIzLjAxNjEgMjYuNDg0OSAyMi45Mjc3IDI2LjM1MTEgMjIuODU2QzI2LjEzMDQgMjIuNzQ0MSAyNS45NDkyIDIyLjQ2MzkgMjYuMTIyNiAyMi4xMjAxQzI2LjE3NzcgMjIuMDA3OCAyNi40NDU4IDIxLjczNTggMjYuNTA4OCAyMS42ODhDMjcuMjI1NiAyMS4yNzIgMjguMDUyNyAyMS40MDc3IDI4LjgxNjkgMjEuNzE5N0MyOS41MjU5IDIyLjAxNjEgMzAuMDYxNSAyMi41NjAxIDMwLjgzNCAyMy4zMjgxQzMxLjYyMTYgMjQuMjU1OSAzMS43NjMyIDI0LjUxMTcgMzIuMjEyNCAyNS4yMDhDMzIuNTY2OSAyNS43NTIgMzIuODkwMSAyNi4zMTIgMzMuMTEwNCAyNi45NTIxQzMzLjI0NDYgMjcuMzUyMSAzMy4wNzEzIDI3LjY4MDIgMzIuNjA2NCAyNy44Nzk5WiIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxLjc4NywwKSI+PHBhdGggZD0iTTExOS40NTkyLDE0LjgyNzVjLTEuMjk1NywwLTIuNjAyLjI4NDQtMy40NSwxLjA4NS0uMDczNy4wNjg1LS4xNDIyLjE0MjItLjIxMDcuMjE2aC0uNjIxNXYtMS4zMDFoLTMuNDA3OXYyMC40NzloMy40MDc5di0xMi43MjU2YzAtMS4zMTE1LjI4NDQtMi42MjgzLDEuMDc0NS0zLjQ4NjkuNzkwMS0uODYzOCwyLjAwMTUtMS4xNjkzLDMuMjA3Ny0xLjE2OTMsMS4yMDA5LDAsMi40MTc3LjMwNTUsMy4yMDc3LDEuMTY5My43OTAxLjg1ODYsMS4wNzQ1LDIuMTc1NCwxLjA3NDUsMy40ODY5LDAsMS4zMDYzLS4yODQ0LDIuNjIzMS0xLjA3NDUsMy40ODE2LS43OTAxLjg2MzgtMi4wMDY4LDEuMTY5My0zLjIwNzcsMS4xNjkzaC0xLjkzODN2My4wOTcxaDEuOTM4M2MyLjAwNjgsMCw0LjAyNDItLjUxMDksNS4zNDEtMS45NDM2czEuNzg1Ni0zLjYyMzgsMS43ODU2LTUuODA0NS0uNDY4OC00LjM3NzEtMS43ODU2LTUuODA5N2MtMS4zMTY4LTEuNDMyNy0zLjMzNDItMS45NDM2LTUuMzQxLTEuOTQzNlpNNzEuODU0MSwyMy4xMTgxYzAsMS4zMTE1LS4yODQ0LDIuNjI4My0xLjA3NDUsMy40ODY5LS43OTAxLjg1ODYtMi4wMDE1LDEuMTY5My0zLjIwNzcsMS4xNjkzcy0yLjQxNzctLjMxMDgtMy4yMDc3LTEuMTY5M2MtLjc5MDEtLjg1ODYtMS4wNzQ1LTIuMTc1NC0xLjA3NDUtMy40ODY5LDAtMS4zMDYzLjI4NDQtMi42MjgzLDEuMDc0NS0zLjQ4NjkuNzkwMS0uODU4NiwyLjAwMTUtMS4xNjQxLDMuMjA3Ny0xLjE2NDFoMS45Mzgzdi0zLjA5NzFoLTEuOTM4M2MtMi4wMDY4LDAtNC4wMjQyLjUxMDktNS4zNDEsMS45NDM2LTEuMzE2OCwxLjQzMjctMS43ODU2LDMuNjIzOC0xLjc4NTYsNS44MDQ1cy40Njg4LDQuMzc3MSwxLjc4NTYsNS44MDk3YzEuMzE2OCwxLjQzMjcsMy4zMzQyLDEuOTQzNiw1LjM0MSwxLjk0MzYsMS4yOTU3LDAsMi41OTY3LS4yODk3LDMuNDUtMS4wODUuMDczNy0uMDY4NS4xNDIyLS4xNDIyLjIwNTQtLjIxNmguNjI2OHYxLjMwMWgzLjQwNzlWMTAuMzg3M2gtMy40MDc5djEyLjczMDlaTTg0Ljk1ODksMTQuODI3NWMtMi4wODU4LDAtNC4xODIyLjUzMi01LjU1MTcsMi4wMTIxLTEuMzY0MiwxLjQ4MDEtMS44NTQxLDMuNzUwMy0xLjg1NDEsNi4wMDk5LDAsMi4yNTQ0LjQ4OTksNC41Mjk4LDEuODU0MSw2LjAwOTksMS4zNjk1LDEuNDgwMSwzLjQ2NTgsMi4wMTIxLDUuNTUxNywyLjAxMjFzNC4xODIyLS41MzIsNS41NTE3LTIuMDEyMWMuNzAwNS0uNzYzNywxLjE3NDYtMS43MzI5LDEuNDY5Ni0yLjgwNzRoLTMuMzcxYy0uMDk0OC4xNDIyLS4yMDAyLjI3OTItLjMxNi40MDU2LS44MjE3Ljg5MDItMi4wODA2LDEuMjA2Mi0zLjMzNDEsMS4yMDYyLTEuMjQ4MywwLTIuNTA3Mi0uMzE2LTMuMzI4OS0xLjIwNjItLjgyMTctLjg5MDItMS4xMTY3LTIuMjU0NC0xLjExNjctMy42MDhzLjI5NS0yLjcxNzksMS4xMTY3LTMuNjA4Yy44MjE3LS44OTAyLDIuMDgwNi0xLjIwNjIsMy4zMjg5LTEuMjA2MiwxLjI1MzYsMCwyLjUxMjUuMzE2LDMuMzM0MSwxLjIwNjIuNTY4OS42MTYzLjg4NDksMS40NTM4LDEuMDI3MSwyLjM2NWgtNi4wMjU3djIuNDg2MWg5LjA3NTR2LTEuMjQzMWMwLTIuMjU5Ni0uNDg5OS00LjUyOTgtMS44NTkzLTYuMDA5OS0xLjM2NDItMS40ODAxLTMuNDY1OC0yLjAxMjEtNS41NTE3LTIuMDEyMVpNMTAyLjA2NjgsMTQuODI3NWMtMi4wODA2LDAtNC4xODIyLjUzMi01LjU0NjQsMi4wMTIxLTEuMzY5NSwxLjQ4MDEtMS44NTkzLDMuNzUwMy0xLjg1OTMsNi4wMDk5LDAsMi4yNTQ0LjQ4OTksNC41Mjk4LDEuODU5Myw2LjAwOTksMS4zNjQyLDEuNDgwMSwzLjQ2NTgsMi4wMTIxLDUuNTQ2NCwyLjAxMjEsMi4wODU4LDAsNC4xODIyLS41MzIsNS41NTE3LTIuMDEyMS43MDU4LS43NjM3LDEuMTc0Ni0xLjczMjksMS40Njk2LTIuODA3NGgtMy4zNzFjLS4wOTQ4LjE0MjItLjIwMDIuMjc5Mi0uMzE2LjQwNTYtLjgyMTcuODkwMi0yLjA4MDYsMS4yMDYyLTMuMzI4OSwxLjIwNjItMS4yNTM2LDAtMi41MTI1LS4zMTYtMy4zMzQyLTEuMjA2Mi0uODIxNy0uODkwMi0xLjExNjYtMi4yNTQ0LTEuMTE2Ni0zLjYwOHMuMjk1LTIuNzE3OSwxLjExNjYtMy42MDhjLjgyMTctLjg5MDIsMi4wODA2LTEuMjA2MiwzLjMzNDItMS4yMDYyLDEuMjQ4MywwLDIuNTA3Mi4zMTYsMy4zMjg5LDEuMjA2Mi41Njg5LjYxNjMuODg0OSwxLjQ1MzgsMS4wMjcxLDIuMzY1aC02LjAyNTd2Mi40ODYxaDkuMDc1NHYtMS4yNDMxYzAtMi4yNTk2LS40ODk4LTQuNTI5OC0xLjg1OTMtNi4wMDk5LTEuMzY0Mi0xLjQ4MDEtMy40NjU4LTIuMDEyMS01LjU1MTctMi4wMTIxWk0xNDEuODM0NCwyMi41ODYxYy0xLjM2NDItLjg3NDQtMy40NjU4LTEuMTg1MS01LjU0NjQtMS4xODUxaC4wNzM3Yy0uODkwMiwwLTEuNzg1Ni0uMTIxMS0yLjM3MDItLjQ2MzUtLjU4NDctLjMzNzEtLjc5MDEtLjg1ODYtLjc5MDEtMS4zNzQ3cy4yMDU0LTEuMDM3Ni43OTAxLTEuMzc0N2MuNTg0Ny0uMzQyNCwxLjQ4MDEtLjQ2MzUsMi4zNzAyLS40NjM1czEuNzg1Ni4xMjY0LDIuMzY1LjQ2MzVjLjU4NDcuMzM3MS43OTU0Ljg1ODYuNzk1NCwxLjM3NDdoMy40NzExYzAtMS4zMzI2LS40NDc3LTIuNjcwNS0xLjY4NTUtMy41NDQ4LTEuMjM3OC0uODc0NC0zLjEzNC0xLjE5MDQtNS4wMTk3LTEuMTkwNHMtMy43ODE5LjMxNi01LjAxOTcsMS4xOTA0Yy0xLjIzNzguODc0NC0xLjY4MDIsMi4yMTIyLTEuNjgwMiwzLjU0NDhzLjQ0MjQsMi42NzU3LDEuNjgwMiwzLjU0NDhjMS4yMzc4Ljg3NDQsMy4xMzQsMS4xOTA0LDUuMDE5NywxLjE5MDQuOTc5NywwLDIuMDU0Mi4xMjExLDIuNjk2OC40NTgyLjY0NzkuMzQyNC44Nzk2Ljg2MzguODc5NiwxLjM4cy0uMjMxOCwxLjAzNzYtLjg3OTYsMS4zNzQ3Yy0uNjQyNi4zMzcxLTEuNjMyOC40NTgyLTIuNjE3OC40NTgyLS45Nzk3LDAtMS45Njk5LS4xMjExLTIuNjE3OC0uNDU4Mi0uNjQyNi0uMzQyNC0uODc0NC0uODU4Ni0uODc0NC0xLjM3NDdoLTMuOTk3OGMwLDEuMzI3My40ODk5LDIuNjcwNSwxLjg1OTMsMy41NDQ4LDEuMzY5NS44NzQ0LDMuNDY1OCwxLjE4NTEsNS41NTE3LDEuMTg1MSwyLjA4MDYsMCw0LjE4MjItLjMxMDgsNS41NDY0LTEuMTg1MSwxLjM2OTUtLjg3NDQsMS44NTkzLTIuMjE3NSwxLjg1OTMtMy41NDQ4LDAtMS4zMzI2LS40ODk5LTIuNjc1Ny0xLjg1OTMtMy41NTAxWk0xNTMuMzk1OSwxNC44Mjc1Yy0yLjA4NTgsMC00LjE4MjIuNTMyLTUuNTUxNywyLjAxMjEtMS4zNjQyLDEuNDgwMS0xLjg1OTMsMy43NTAzLTEuODU5Myw2LjAwOTksMCwyLjI1NDQuNDk1MSw0LjUyOTgsMS44NTkzLDYuMDA5OSwxLjM2OTUsMS40ODAxLDMuNDY1OCwyLjAxMjEsNS41NTE3LDIuMDEyMXM0LjE4MjItLjUzMiw1LjU1MTYtMi4wMTIxYy43MDA1LS43NjM3LDEuMTc0Ni0xLjczMjksMS40NjQzLTIuODA3NGgtMy4zNjU4Yy0uMDk0OC4xNDIyLS4yMDAxLjI3OTItLjMxNi40MDU2LS44MjE3Ljg5MDItMi4wODA2LDEuMjA2Mi0zLjMzNDIsMS4yMDYyLTEuMjQ4MywwLTIuNTEyNS0uMzE2LTMuMzI4OS0xLjIwNjItLjgyMTctLjg5MDItMS4xMTY2LTIuMjU0NC0xLjExNjYtMy42MDhzLjI5NS0yLjcxNzksMS4xMTY2LTMuNjA4Yy44MTY0LS44OTAyLDIuMDgwNi0xLjIwNjIsMy4zMjg5LTEuMjA2MiwxLjI1MzYsMCwyLjUxMjUuMzE2LDMuMzM0MiwxLjIwNjIuNTY4OS42MTYzLjg4NDksMS40NTM4LDEuMDI3MSwyLjM2NWgtNi4wMzF2Mi40ODYxaDkuMDgwN3YtMS4yNDMxYzAtMi4yNTk2LS40ODk4LTQuNTI5OC0xLjg1OTMtNi4wMDk5LTEuMzY5NS0xLjQ4MDEtMy40NjU4LTIuMDEyMS01LjU1MTYtMi4wMTIxWk0xNzAuNTAzOCwxNC44Mjc1Yy0yLjA4NTgsMC00LjE4MjIuNTMyLTUuNTUxNiwyLjAxMjEtMS4zNjQyLDEuNDgwMS0xLjg1OTMsMy43NTAzLTEuODU5Myw2LjAwOTksMCwyLjI1NDQuNDk1MSw0LjUyOTgsMS44NTkzLDYuMDA5OSwxLjM2OTUsMS40ODAxLDMuNDY1OCwyLjAxMjEsNS41NTE2LDIuMDEyMXM0LjE4MjItLjUzMiw1LjU1MTctMi4wMTIxYy43MDA1LS43NjM3LDEuMTc0Ni0xLjczMjksMS40Njk2LTIuODA3NGgtMy4zNzFjLS4wOTQ4LjE0MjItLjIwMDIuMjc5Mi0uMzE2LjQwNTYtLjgyMTcuODkwMi0yLjA4MDYsMS4yMDYyLTMuMzM0MiwxLjIwNjItMS4yNDgzLDAtMi41MTI1LS4zMTYtMy4zMjg5LTEuMjA2Mi0uODIxNy0uODkwMi0xLjExNjctMi4yNTQ0LTEuMTE2Ny0zLjYwOHMuMjk1LTIuNzE3OSwxLjExNjctMy42MDhjLjgxNjQtLjg5MDIsMi4wODA2LTEuMjA2MiwzLjMyODktMS4yMDYyLDEuMjUzNiwwLDIuNTEyNS4zMTYsMy4zMzQyLDEuMjA2Mi41Njg5LjYxNjMuODg0OSwxLjQ1MzgsMS4wMjcxLDIuMzY1aC02LjAyNTd2Mi40ODYxaDkuMDc1NHYtMS4yNDMxYzAtMi4yNTk2LS40ODk5LTQuNTI5OC0xLjg1OTMtNi4wMDk5LTEuMzY5NS0xLjQ4MDEtMy40NjU4LTIuMDEyMS01LjU1MTctMi4wMTIxWk0xODAuMjAwOCw5LjY3MDloMy40MDc5djIxLjIwMDZoLTMuNDA3OVY5LjY3MDlaTTE5MC43OTg0LDE1LjUzODZsLTUuNTkzOCw2LjgzMTYsNS41OTM4LDguNTAxM2g0LjIyNDNsLTUuNTkzOC04LjUwMTMsNS41OTM4LTYuODMxNmgtNC4yMjQzWiIvPjwvZz48L2c+PC9zdmc+">
-        <div class="brandLine"></div>
+  <main id="app" aria-label="DeepSeek Harness 正在启动">
+    <div class="content">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+          <path fill="currentColor" d="M48.8354 10.0479C48.3232 9.79199 48.1025 10.2798 47.8032 10.5278C47.7007 10.6079 47.6143 10.7119 47.5273 10.8076C46.7793 11.624 45.9048 12.1597 44.7622 12.0957C43.0923 12 41.666 12.5356 40.4058 13.8398C40.1377 12.2319 39.2476 11.272 37.8926 10.6558C37.1836 10.3359 36.4668 10.0156 35.9702 9.31982C35.6235 8.82373 35.5293 8.27197 35.356 7.72754C35.2456 7.3999 35.1353 7.06396 34.7651 7.00781C34.3633 6.94385 34.2056 7.2876 34.0479 7.57568C33.418 8.75195 33.1733 10.0479 33.1973 11.3599C33.2524 14.312 34.4736 16.6641 36.8999 18.3359C37.1758 18.5278 37.2466 18.7197 37.1597 19C36.9946 19.5757 36.7974 20.1357 36.624 20.7119C36.5137 21.0801 36.3486 21.1597 35.9624 21C34.6309 20.4321 33.481 19.5918 32.4644 18.5757C30.7393 16.8721 29.1792 14.9917 27.2334 13.52C26.7764 13.1758 26.3193 12.856 25.8467 12.5518C23.8618 10.584 26.1069 8.96777 26.627 8.77588C27.1704 8.57568 26.8159 7.8877 25.0591 7.896C23.3022 7.90381 21.6953 8.50391 19.647 9.30371C19.3477 9.42383 19.0322 9.51172 18.7095 9.58398C16.8501 9.22363 14.9199 9.14355 12.9033 9.37598C9.10596 9.80762 6.07275 11.6396 3.84326 14.7681C1.16455 18.5278 0.53418 22.7998 1.30664 27.2559C2.11768 31.9521 4.46582 35.8398 8.07373 38.8799C11.8159 42.0322 16.1255 43.5762 21.041 43.2803C24.0269 43.104 27.3516 42.6963 31.1016 39.4561C32.0469 39.936 33.0396 40.1279 34.686 40.272C35.9546 40.3921 37.1758 40.208 38.1211 40.0078C39.6021 39.688 39.4995 38.2881 38.9639 38.0322C34.623 35.9678 35.5762 36.8081 34.71 36.1279C36.9155 33.4639 40.2402 30.6958 41.54 21.728C41.6426 21.0161 41.5557 20.5679 41.54 19.9917C41.5322 19.6396 41.6108 19.5039 42.0049 19.4639C43.0923 19.3359 44.1479 19.0317 45.1167 18.4878C47.9292 16.9199 49.064 14.3438 49.3315 11.2559C49.3711 10.7837 49.3237 10.2959 48.8354 10.0479ZM24.3262 37.8398C20.1196 34.4639 18.0791 33.3521 17.2358 33.3999C16.4482 33.4482 16.5898 34.3682 16.7632 34.9678C16.9443 35.5601 17.1812 35.9683 17.5117 36.4878C17.7402 36.832 17.8979 37.3442 17.2832 37.728C15.9282 38.584 13.5728 37.4399 13.4624 37.3838C10.7207 35.7358 8.42822 33.5601 6.81348 30.584C5.25342 27.7197 4.34766 24.6479 4.19775 21.3677C4.1582 20.5757 4.38672 20.2959 5.15869 20.1519C6.17529 19.96 7.22314 19.9199 8.23926 20.0718C12.5327 20.7119 16.1885 22.6719 19.2529 25.7759C21.002 27.5439 22.3252 29.6558 23.6885 31.7202C25.1377 33.9121 26.6978 36 28.6831 37.7119C29.3843 38.312 29.9434 38.7681 30.479 39.104C28.8643 39.2881 26.1699 39.3281 24.3262 37.8398ZM26.3433 24.6001C26.3433 24.248 26.6191 23.9678 26.9658 23.9678C27.0444 23.9678 27.1152 23.9839 27.1782 24.0078C27.2651 24.04 27.3438 24.0879 27.4067 24.1602C27.5171 24.272 27.5801 24.4321 27.5801 24.6001C27.5801 24.9521 27.3042 25.2319 26.9575 25.2319C26.6108 25.2319 26.3433 24.9521 26.3433 24.6001ZM32.6064 27.8799C32.2046 28.0479 31.8027 28.1919 31.4165 28.208C30.8179 28.2397 30.1641 27.9922 29.8096 27.688C29.2583 27.2158 28.8643 26.9521 28.6987 26.1279C28.6279 25.7759 28.6675 25.2319 28.7305 24.9199C28.8721 24.248 28.7144 23.8159 28.2495 23.4238C27.8716 23.104 27.3911 23.0161 26.8633 23.0161C26.666 23.0161 26.4849 22.9277 26.3511 22.856C26.1304 22.7441 25.9492 22.4639 26.1226 22.1201C26.1777 22.0078 26.4458 21.7358 26.5088 21.688C27.2256 21.272 28.0527 21.4077 28.8169 21.7197C29.5259 22.0161 30.0615 22.5601 30.834 23.3281C31.6216 24.2559 31.7632 24.5117 32.2124 25.208C32.5669 25.752 32.8901 26.312 33.1104 26.9521C33.2446 27.3521 33.0713 27.6802 32.6064 27.8799Z"/>
+        </svg>
+      </div>
+      <h1>DeepSeek Harness</h1>
+      <p class="phase" id="phase" role="status" aria-live="polite">正在准备运行环境</p>
+      <div class="track" aria-hidden="true">
+        <span class="fill" id="fill"></span>
+      </div>
+      <div class="meta">
+        <span class="detail" id="detail">首次启动可能需要一些时间</span>
+        <span class="percent" id="percent">0%</span>
       </div>
     </div>
-    <div class="harnessBig">HARNESS</div>
-    <div class="cornerName">HARNESS</div>
+  </main>
+  <script>
+    (function () {
+      var words = ["正在准备运行环境", "正在启动引擎", "正在连接界面", "即将完成"];
+      var state = { p: 0, stage: 0, eta: null, done: false, driven: false };
+      var fill = document.getElementById("fill");
+      var phase = document.getElementById("phase");
+      var detail = document.getElementById("detail");
+      var percent = document.getElementById("percent");
+      var fallbackTimer = 0;
+      var startedAt = performance.now();
+      var lastRenderedStage = -1;
 
-    <div class="meta">
-      BOOT <b>SEQUENCE</b><br>
-      PAYLOAD <b>963 MB</b><br>
-      COLD START
-    </div>
+      function stageFor(p) {
+        return p < 0.48 ? 0 : p < 0.82 ? 1 : p < 0.98 ? 2 : 3;
+      }
 
-    <div class="card">
-      <div class="cHead"><b>DEEPSEEK HARNESS</b><i>V4.1 · FLASH</i></div>
-      <div class="cDiv"></div>
-      <div class="mUser">在吗？</div>
-      <div class="sysline"><i class="dot"></i><span id="systext"></span><i class="scaret" id="scaret"></i></div>
-      <div class="mAi"><span>我在。</span><div class="caret"></div></div>
-      <div class="cFoot"><div>SESSION 0001</div><div class="hi">COLD BOOT · 0 ERR</div></div>
-      <div class="sweep"></div>
-      <div class="flash"></div>
-    </div>
-    <div class="slit"></div>
-    <div class="tick tl"></div><div class="tick tr"></div><div class="tick bl"></div><div class="tick br"></div>
+      function paint() {
+        var p = Math.max(0, Math.min(1, Number(state.p) || 0));
+        fill.style.transform = "scaleX(" + p.toFixed(4) + ")";
+        percent.textContent = Math.round(p * 100) + "%";
+        if (state.stage !== lastRenderedStage) {
+          lastRenderedStage = state.stage;
+          phase.textContent = words[Math.max(0, Math.min(3, state.stage))];
+        }
+        if (state.done || p >= 1) {
+          detail.textContent = "启动完成";
+        } else if (state.eta != null) {
+          detail.textContent = "预计还需 " + Math.max(1, Math.round(state.eta)) + " 秒";
+        } else if (p < 0.48) {
+          detail.textContent = "首次启动可能需要一些时间";
+        } else {
+          detail.textContent = "正在加载工作区";
+        }
+      }
 
-    <div class="titleBlock">
-      <div class="t1">DEEPSEEK</div>
-      <div class="t2">HARNESS</div>
-      <div class="rule"></div>
-      <div class="t3">对话，即是系统。</div>
-    </div>
-    <div class="boot">
-      <div class="bStages"><i class="on">FILES</i><i>ENGINE</i><i>LINK</i><i>READY</i></div>
-      <div class="bTrack"><div class="bFill" id="bFill"><em></em></div><div class="bHead" id="bHead"></div></div>
-      <div class="bRow"><div><span id="bStage">解压中</span> · <b id="bPct">0</b>%</div><div class="eta" id="bEta"></div></div>
-    </div>
-    <div class="t4">2026 · DEEPSEEK HARNESS</div>
+      function finish() {
+        if (state.done) return;
+        state.done = true;
+        state.p = 1;
+        state.stage = 3;
+        paint();
+        setTimeout(function () {
+          document.body.classList.add("done");
+        }, 120);
+      }
 
-    <div class="progress"></div>
-    <div class="hint">TAP TO REPLAY</div>
-  </div>
-  <div class="endfade"></div>
-  <div class="vig"></div>
-  <div class="grain"></div>
-</div>
-<script>
-(function(){
-  var stage=document.getElementById('stage');
-  function fit(){
-    // Cover the 16:9.5 viewport instead of letterboxing; the visual centre
-    // contains every essential boot label and the progress rail.
-    var s=Math.max(window.innerWidth/1080,window.innerHeight/1920);
-    stage.style.transform='scale('+s+')';
-  }
-  window.addEventListener('resize',fit);fit();
+      function demo() {
+        if (state.driven || state.done) return;
+        var start = performance.now();
+        var duration = 2800;
+        fallbackTimer = setInterval(function () {
+          if (state.driven || state.done) {
+            clearInterval(fallbackTimer);
+            return;
+          }
+          var k = Math.min(0.94, (performance.now() - start) / duration);
+          state.p = k;
+          state.stage = stageFor(k);
+          paint();
+        }, 90);
+      }
 
-  var SYSTEXT='ambient.brightness 0 \u2192 100';
-  var timers=[];
-  function clearTimers(){for(var i=0;i<timers.length;i++)clearTimeout(timers[i]);timers=[];}
-  function later(fn,ms){timers.push(setTimeout(fn,ms));}
-  var systext=document.getElementById('systext'),scaret=document.getElementById('scaret');
-  function typeSys(){
-    systext.textContent='';scaret.classList.remove('off');scaret.classList.add('typing');
-    var i=0;
-    (function step(){
-      systext.textContent=SYSTEXT.slice(0,++i);
-      if(i<SYSTEXT.length) later(step,42);
-      else later(function(){scaret.classList.remove('typing');scaret.classList.add('off');},420);
+      window.DSH_BOOT = {
+        progress: function (p) {
+          state.driven = true;
+          state.p = Number(p) || 0;
+          state.stage = stageFor(state.p);
+          paint();
+        },
+        stage: function (value) {
+          state.driven = true;
+          if (typeof value === "number") {
+            state.stage = Math.max(0, Math.min(3, value | 0));
+          } else {
+            var index = words.indexOf(String(value));
+            if (index >= 0) state.stage = index;
+          }
+          paint();
+        },
+        eta: function (seconds) {
+          state.eta = Number(seconds);
+          paint();
+        },
+        ready: function () {
+          state.driven = true;
+          if ((performance.now() - startedAt) / 1000 < 16.9) state.p = 1;
+          state.p = Math.max(state.p, 0.86);
+          state.stage = 2;
+          state.eta = null;
+          paint();
+          setTimeout(finish, 160);
+        },
+        state: function () {
+          return { p: state.p, stage: state.stage, done: state.done };
+        }
+      };
+
+      paint();
+      setTimeout(demo, 700);
     })();
-  }
-
-  /* ---------- boot progress (driven by the app; self-demos otherwise) ---------- */
-  var stEls=[].slice.call(document.querySelectorAll('.bStages i'));
-  var fillEl=document.getElementById('bFill'),headEl=document.getElementById('bHead'),
-      pctEl=document.getElementById('bPct'),etaEl=document.getElementById('bEta'),
-      stageEl=document.getElementById('bStage'),shimEl=document.querySelector('.bFill em');
-  var WORDS=['\u89e3\u538b\u4e2d','\u542f\u52a8\u5f15\u64ce','\u5efa\u7acb\u8fde\u63a5','\u5c31\u7eea'];
-  var S={p:0,stage:0,eta:null,done:false};
-  var driven=false, demo=null, startedAt=performance.now();
-  function stageFor(p){return p<.55?0:p<.85?1:p<.975?2:3;}
-  function paint(){
-    var p=S.p<0?0:(S.p>1?1:S.p);
-    fillEl.style.width=(p*100).toFixed(2)+'%';
-    headEl.style.left=(p*100).toFixed(2)+'%';
-    headEl.style.opacity=(p>0.004&&p<0.9995)?1:0;
-    shimEl.style.animationPlayState=(p>0.9995||p<0.004)?'paused':'running';
-    pctEl.textContent=Math.round(p*100);
-    for(var i=0;i<stEls.length;i++)
-      stEls[i].className = i<S.stage?'dn':(i===S.stage?'on':'');
-    stageEl.textContent=WORDS[S.stage];
-    if(S.done||p>=1) etaEl.textContent='\u542f\u52a8\u5b8c\u6210';
-    else if(S.eta!=null) etaEl.textContent='\u5269 '+Math.max(1,Math.round(S.eta))+' \u79d2';
-    else etaEl.textContent='';
-  }
-  function finish(){
-    if(S.done) return;
-    S.done=true;S.p=1;S.stage=3;paint();
-    later(function(){document.body.classList.add('done');},900);
-  }
-  function demoStart(){
-    if(driven||S.done) return;
-    var t0=performance.now(), dur=7400;
-    demo=setInterval(function(){
-      if(driven||S.done){clearInterval(demo);demo=null;return;}
-      var k=(performance.now()-t0)/dur;
-      if(k>=1){clearInterval(demo);demo=null;finish();return;}
-      S.p=k;S.stage=stageFor(k);S.eta=(1-k)*dur/1000;paint();
-    },90);
-  }
-  function jump(sec){
-    clearTimers();
-    systext.textContent=SYSTEXT;
-    scaret.classList.remove('typing');scaret.classList.add('off');
-    document.getAnimations().forEach(function(a){try{a.currentTime=sec*1000;}catch(e){}});
-  }
-  window.DSH_BOOT={
-    progress:function(p){driven=true;S.p=+p||0;S.stage=stageFor(S.p);paint();},
-    stage:function(k){driven=true;
-      if(typeof k==='number'){S.stage=Math.max(0,Math.min(3,k|0));}
-      else{var i=WORDS.indexOf(String(k));if(i>=0)S.stage=i;}
-      paint();},
-    eta:function(sec){S.eta=+sec;paint();},
-    ready:function(){
-      driven=true;
-      if((performance.now()-startedAt)/1000<16.9){jump(16.85);}
-      S.p=Math.max(S.p,.82);S.stage=stageFor(S.p);S.eta=null;paint();
-      later(function(){S.p=1;S.stage=3;paint();},360);
-      later(finish,380);
-    },
-    state:function(){return {p:S.p,stage:S.stage,done:S.done};}
-  };
-
-  function replay(){
-    clearTimers();
-    if(demo){clearInterval(demo);demo=null;}
-    document.body.classList.remove('run');
-    document.body.classList.remove('done');
-    void stage.offsetWidth;
-    S={p:0,stage:0,eta:null,done:false};driven=false;startedAt=performance.now();
-    paint();
-    document.body.classList.add('run');
-    later(typeSys,7950);
-    later(demoStart,17300);
-  }
-  document.body.classList.add('run');
-  document.getAnimations().forEach(function(a){
-    try{a.playbackRate=2.4;}catch(e){}
-  });
-  paint();
-  later(typeSys,7950);
-  later(demoStart,17300);
-  document.addEventListener('click',function(){if(document.body.classList.contains('done'))replay();});
-  document.addEventListener('keydown',function(e){if(e.code==='Space'||e.key==='r'){e.preventDefault();replay();}});
-
-  var q=new URLSearchParams(location.search);
-  if(q.get('clean'))document.body.classList.add('clean');
-  var still=q.get('still');
-  if(still!==null&&still!==''){
-    var t=parseFloat(still)||0;
-    clearTimers();systext.textContent='';
-    setTimeout(function(){
-      systext.textContent=t>=8.0?SYSTEXT:'';
-      if(t>=9.0)scaret.classList.add('off');
-      S.p=t>=17.3?0.62:0;S.stage=stageFor(S.p);S.eta=t>=17.3?3:null;paint();
-      document.getAnimations().forEach(function(a){try{a.currentTime=t*1000;a.pause();}catch(e){}});
-    },150);
-  }
-})();
-</script>
+  </script>
 </body>
 </html>
