@@ -188,26 +188,6 @@
 })();
 
 /**
- * 禁止网页被双指缩放 v0.5
- *
- * 症状：**预览窗存在时**双指捏合会把整个对话页缩放；没有预览窗时又缩不动。
- * 成因：DSH index.html 的 viewport 没有 user-scalable=no / maximum-scale；
- *   WebView 的 setSupportZoom(false) 在现代 WebView 上不可靠（viewport 才是权威）。
- * 做法（两层）：① inject.sh 给 viewport 补 maximum-scale/user-scalable=no；
- *   ② 这里兜一道：捕获阶段拦 ≥2 指的 touchmove / gesture*。
- */
-(function () {
-  function blockMulti(e) {
-    if (e && e.touches && e.touches.length > 1 && e.cancelable) e.preventDefault();
-  }
-  document.addEventListener('touchmove', blockMulti, { passive: false, capture: true });
-  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (n) {
-    document.addEventListener(n, function (e) { if (e && e.cancelable) e.preventDefault(); },
-      { passive: false, capture: true });
-  });
-})();
-
-/**
  * 内核更新提示横幅 v1（配合插件 @deepseek-ai/dsh-update-check）
  *
  * 数据源：GET /dsh-update-check/status（插件注册的只读路由，只含版本号）。
