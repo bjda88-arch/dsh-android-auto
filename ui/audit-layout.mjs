@@ -24,6 +24,7 @@ const context = await browser.newContext({
   deviceScaleFactor: 2,
   isMobile: mobile,
   hasTouch: mobile,
+  colorScheme: process.env.COLOR_SCHEME || "light",
 });
 const page = await context.newPage();
 await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
@@ -69,6 +70,18 @@ if (process.env.NEW_SESSION === "1") {
   });
   await page.waitForTimeout(1200);
 }
+if (process.env.CLICK_TEXTS) {
+  for (const wanted of process.env.CLICK_TEXTS.split(";")) {
+    const label = wanted.trim();
+    if (!label) continue;
+    await page.evaluate((text) => {
+      const candidate = [...document.querySelectorAll("button, [role=button]")]
+        .find((el) => (el.textContent || "").replace(/\s+/g, " ").includes(text));
+      if (candidate) candidate.click();
+    }, label);
+    await page.waitForTimeout(700);
+  }
+}
 
 const audit = await page.evaluate(() => {
   const describe = (el) => {
@@ -93,7 +106,7 @@ const audit = await page.evaluate(() => {
       fontSize: cs.fontSize,
     };
   };
-  const pick = (selector) =>
+  const pick = (selector, limit = 20) =>
     [...document.querySelectorAll(selector)]
       .filter((el) => {
         const r = el.getBoundingClientRect();
@@ -106,7 +119,7 @@ const audit = await page.evaluate(() => {
           r.top < innerHeight
         );
       })
-      .slice(0, 20)
+      .slice(0, limit)
       .map(describe);
   return {
     viewport: {
@@ -115,7 +128,29 @@ const audit = await page.evaluate(() => {
       dpr: devicePixelRatio,
       bodyW: document.body.scrollWidth,
       bodyH: document.body.scrollHeight,
+      documentW: document.documentElement.scrollWidth,
+      documentH: document.documentElement.scrollHeight,
     },
+    colors: (() => {
+      const sample = (selector) => {
+        const el = document.querySelector(selector);
+        if (!el) return null;
+        const cs = getComputedStyle(el);
+        return {
+          color: cs.color,
+          background: cs.backgroundColor,
+          border: cs.borderColor,
+        };
+      };
+      return {
+        htmlDark: document.documentElement.hasAttribute("data-ds-dark-theme"),
+        body: sample("body"),
+        header: sample('[class*="_header"]'),
+        composer: sample('[data-composer-card]'),
+        input: sample('[contenteditable="true"], textarea'),
+        drawer: sample('[class*="_sidebarCol"]'),
+      };
+    })(),
     frame: pick('[class*="_frame"]'),
     frameStyle: (() => {
       const el = document.querySelector('[class*="_frame"]');
@@ -147,6 +182,7 @@ const audit = await page.evaluate(() => {
     ),
     buttons: pick(
       'button, [role="button"], [data-cordis-badge], [class*="_navCell"]',
+      80,
     ),
     text: document.body.innerText.slice(0, 6000),
   };
