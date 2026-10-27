@@ -3,7 +3,24 @@
 This repository builds a private-signing Android release of DeepSeek Harness and
 follows the official DeepSeek Harness release feed.
 
-Current release: `v1.45.1`, with DSH `0.2.1-rc.2`.
+Current release: `v1.45.3`, with DSH `0.2.1-rc.2`.
+
+| Portrait 16:9.5 | Landscape 16:9.5 | Navigation drawer |
+| --- | --- | --- |
+| ![Portrait](docs/screenshots/portrait-16x9.5.png) | ![Landscape](docs/screenshots/landscape-16x9.5.png) | ![Drawer](docs/screenshots/drawer-16x9.5.png) |
+
+## Mobile UI
+
+The Android UI is tuned for a 16:9.5 display in both orientations:
+
+- the collapsed sidebar rail no longer consumes content width;
+- navigation uses a full-height overlay drawer with edge-swipe support;
+- the header is reduced to 48px portrait / 42px landscape;
+- the conversation and composer use nearly the full viewport width;
+- safe-area, software-keyboard, touch-target and landscape rules are bundled;
+- the boot screen uses cover scaling, so the display is not letterboxed.
+
+The source of the mobile override is under [`ui/`](ui/).
 
 ## Update model
 
@@ -41,8 +58,9 @@ Run the `Build signed APK` workflow manually with:
 - `upstream_version`: the DSH kernel embedded in the APK
 
 The workflow downloads the pinned Android base APK, compiles the Android shell
-with the update endpoint pointed at this repository, signs it with the
-repository release key, verifies it, and publishes a GitHub Release.
+with the update endpoint pointed at this repository, patches the bundled Web UI,
+signs it with the repository release key, verifies it, and publishes a GitHub
+Release.
 
 ## Required secrets
 
