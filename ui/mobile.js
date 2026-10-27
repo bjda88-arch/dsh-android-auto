@@ -305,6 +305,8 @@
   var SWIPE_EDGE = 22;
   var SWIPE_DISTANCE = 58;
   var touchStart = null;
+  var lastDrawerOpen = null;
+  var syncTimer = 0;
 
   function menuButton() {
     return document.querySelector('.dsh-mobile-menu-btn');
@@ -321,6 +323,8 @@
 
   function syncDrawerState() {
     var open = !!scrim();
+    if (open === lastDrawerOpen) return;
+    lastDrawerOpen = open;
     root.classList.toggle('dsh-mobile-drawer-open', open);
     var menu = menuButton();
     if (menu) {
@@ -337,15 +341,16 @@
     syncDrawerState();
   }
 
-  var observer = new MutationObserver(function () {
-    syncDrawerState();
-  });
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true
-  });
+  function scheduleSync() {
+    if (syncTimer) return;
+    syncTimer = setTimeout(function () {
+      syncTimer = 0;
+      syncDrawerState();
+    }, 0);
+  }
 
   document.addEventListener('click', function (event) {
+    scheduleSync();
     var button = event.target && event.target.closest
       ? event.target.closest('button, [role="button"]')
       : null;
