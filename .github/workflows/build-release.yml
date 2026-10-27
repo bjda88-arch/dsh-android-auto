@@ -75,7 +75,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p work/gen/com/deepseek/harness work/classes work/dex work/aar
+          UI_DIST="work/overlay/dshroot/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-web-frontend/dist"
+          mkdir -p work/gen/com/deepseek/harness work/classes work/dex work/aar "$UI_DIST"
           base_url=$(gh api "repos/$PORT_REPO/releases/tags/$PORT_TAG" \
             --jq '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' | head -1)
           test -n "$base_url"
@@ -97,6 +98,14 @@ jobs:
 
           grep -F "https://api.github.com/repos/${{ github.repository }}/releases/latest" \
             upstream/android-app/src/com/deepseek/harness/MainActivity.java
+
+          cp ui/mobile.css "$UI_DIST/mobile.css"
+          cp ui/mobile.js "$UI_DIST/mobile.js"
+          cp ui/index.html "$UI_DIST/index.html"
+          node upstream/selfbuild/lib/selfbuild.js payload-extract \
+            work/base.apk work/payload-base.zip
+          node upstream/selfbuild/lib/selfbuild.js payload-patch \
+            work/payload-base.zip work/payload-ui.zip work/overlay
 
       - name: Compile Android shell to DEX
         shell: bash
@@ -125,7 +134,11 @@ jobs:
         run: |
           set -euo pipefail
           node upstream/selfbuild/lib/selfbuild.js apk-pack \
-            work/base.apk - work/unsigned.apk --dex work/dex/classes.dex
+            work/base.apk work/payload-ui.zip work/unsigned.apk \
+            --dex work/dex/classes.dex \
+            --asset ui/mobile.css:assets/mobile.css \
+            --asset ui/mobile.js:assets/mobile.js \
+            --asset ui/boot.html:assets/boot.html
           node upstream/selfbuild/scripts/set-apk-version.js \
             work/unsigned.apk work/versioned.apk \
             --name "$APP_VERSION" --code "$APP_CODE" \
