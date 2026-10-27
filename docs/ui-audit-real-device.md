@@ -1,13 +1,17 @@
-# DSH Mobile 16:9.5 UI/UX Audit
+# DSH Mobile Real-Device UI/UX Audit
+
+Updated: 2026-10-28
 
 ## Scope
 
-Audited the real DSH Web UI at four CSS viewports:
+The latest reference is the supplied physical-device capture at 1320 × 2232.
+At a 3.2 density this maps to an effective 412 × 697 CSS viewport, slightly
+taller than 16:9.5. The DSH Web UI was audited at:
 
-- `360 x 607` portrait (`9.5:16`)
-- `570 x 960` portrait, high-density reference
-- `640 x 380` landscape (`16:9.5`)
-- `960 x 570` landscape, high-density reference
+- `412 x 697` portrait, matching the supplied device frame
+- `360 x 609` portrait, small-phone check at the same ratio
+- `697 x 412` landscape
+- `412 x 650` shorter usable-WebView check
 
 The audit used the UI UX Pro Max accessibility, touch, layout, navigation,
 motion and performance rules; the Appllama native-app design workflow; and the
@@ -32,6 +36,12 @@ live DSH DOM and its upstream design tokens.
     surfaces.
 11. The off-screen sidebar remained in the accessibility tree while closed.
 12. The viewport disabled zoom and the shell blocked pinch gestures.
+13. The weather table's upstream `30vw` cell cap caused short fragments and
+    orphan Chinese characters.
+14. The model selector showed a hard-truncated model name.
+15. Composer metadata was clipped by the Android gesture area.
+16. The floating return-to-bottom control could cover the final paragraph.
+17. Keyboard shortcut hints in the dark account menu measured only 3.66:1.
 
 ## Changes
 
@@ -62,28 +72,48 @@ live DSH DOM and its upstream design tokens.
 - Settings tabs now use a DSH-style text tab with a blue underline; active text
   is primary-colored instead of white on a pale background.
 - Settings section labels and descriptions use the secondary text token.
+- The title and tab row now align at the same 58px leading edge; answer content
+  and the composer align at the screen gutter.
+- CJK text uses zero tracking, `line-break: strict`, normal word breaking and
+  `text-wrap: pretty`; long Latin tokens retain controlled wrapping.
+- Data tables use a 30/70 split on the reference phone and a 26/74 split at
+  360px. The narrow variant uses 13px/20px table text so values stay whole.
+- The composer model label can use up to 45% of its row and has its separate
+  icon removed, keeping `DeepSeek-V4.1-Flash` readable.
+- The composer metadata has a 12px minimum safe-area floor, 11.5px text,
+  semantic-secondary contrast and horizontal overflow as a last resort.
+- Return-to-bottom is a 38px visual control with a 44px expanded hit area and
+  is placed in the composer's quiet upper-right area.
+- Keyboard shortcut hints now use the secondary label token in both themes.
+- At 150% text scaling, the header grows to 86px, the model selector receives
+  a full second toolbar row, and the composer expands without clipping its
+  placeholder or metadata. The page remains free of horizontal overflow.
 
 ## Measured result
 
 | Viewport | Horizontal overflow | Header | Composer | Input card |
 | --- | --- | ---: | ---: | ---: |
-| 360 x 607 | none | 48px | 348px (96.7%) | 340px (94.4%) |
-| 640 x 380 | none | 44px | 621px (97.0%) | 613px (95.8%) |
-| 570 x 960 | none | 48px | 554px (97.2%) | 546px (95.8%) |
-| 960 x 570 | none | 44px | 786px | 778px |
+| 412 x 697 | none | 79px with tabs | 394px (95.7%) | 394px (95.7%) |
+| 360 x 609 | none | 79px with tabs | 344px (95.6%) | 344px (95.6%) |
+| 697 x 412 | none | 79px with tabs | 673px (96.6%) | 673px (96.6%) |
 
-The drawer exposes a 318px usable panel at 360px viewport width and does not
-reduce the 360px main column.
+At 412px, the table columns measure 118px / 276px. At 360px they measure
+89px / 255px. The model label measures 130px against 130px of available text
+width, so the tested model name is not truncated.
 
 ## Visual-system checks
 
 - One accent family: DSH blue, taken from upstream semantic tokens.
 - One neutral family and semantic light/dark surfaces.
-- Shape scale: 10px controls, 14px floating controls, 20px composer.
+- Shape scale: 10px controls, 14px floating controls, 18px composer.
 - No emoji in structural chrome.
 - SVG icons retain upstream DSH geometry.
 - Light and dark surfaces both render without component-level raw colors.
-- Touch feedback uses background/opacity and 44px hit areas.
+- Touch feedback uses background/opacity and expanded 44px hit areas.
+- Light and dark answer previews, drawer and menu surfaces report no WCAG A/AA
+  violations in the current unauthenticated test state, including 150% text.
+  The authenticated settings surface retains the earlier zero-violation audit
+  and the same corrected tab styling.
 
 ## Remaining device verification
 

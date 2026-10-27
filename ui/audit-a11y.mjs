@@ -1,5 +1,6 @@
 import { chromium } from "playwright";
 import fs from "node:fs";
+import path from "node:path";
 
 const url = process.env.DSH_PREVIEW_URL;
 if (!url) throw new Error("DSH_PREVIEW_URL is required");
@@ -27,6 +28,11 @@ const context = await browser.newContext({
 const page = await context.newPage();
 await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
 await page.waitForTimeout(5000);
+if (process.env.CSS_PATH) {
+  await page.addStyleTag({
+    content: fs.readFileSync(path.resolve(process.env.CSS_PATH), "utf8"),
+  });
+}
 await page.evaluate(() => {
   for (const el of document.querySelectorAll(
     '[role="presentation"], [aria-hidden="true"]._mask_o6lrb_18',
@@ -53,6 +59,18 @@ if (process.env.CLICK_TEXTS) {
         .find((node) => (node.textContent || "").replace(/\s+/g, " ").includes(text));
       if (el) el.click();
     }, wanted.trim());
+    await page.waitForTimeout(500);
+  }
+}
+if (process.env.CLICK_LABELS) {
+  for (const wanted of process.env.CLICK_LABELS.split(";")) {
+    const label = wanted.trim();
+    if (!label) continue;
+    await page.evaluate((exactLabel) => {
+      const candidate = [...document.querySelectorAll("button, [role=button]")]
+        .find((el) => (el.getAttribute("aria-label") || "").startsWith(exactLabel));
+      if (candidate) candidate.click();
+    }, label);
     await page.waitForTimeout(500);
   }
 }

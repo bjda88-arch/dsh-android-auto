@@ -666,14 +666,14 @@ pre, code {
 }
 
 /* ==========================================================================
-   DSH Mobile 2026.10 — full-bleed 16:9.5 layout
+   DSH Mobile 2026.10 — full-bleed real-device layout
    --------------------------------------------------------------------------
    The shell is intentionally kept visually close to upstream DSH:
    neutral surfaces, one blue accent, restrained borders and no decorative
    chrome. The mobile adaptation only changes geometry and touch ergonomics.
 
-   Portrait target : 9.5:16 (for example 570 x 960 CSS px)
-   Landscape target: 16:9.5 (for example 960 x 570 CSS px)
+   Primary target  : 412 x 697 CSS px (1320 x 2232 at 3.2x)
+   Landscape target: 697 x 412 CSS px
    ========================================================================== */
 
 @media (max-width: 1023px) {
@@ -1086,7 +1086,6 @@ pre, code {
   [class*="_markdown_"] {
     line-height: 1.62 !important;
   }
-  }
 
   .wSkVaW_root[data-phase="active"] .wSkVaW_composerSeat {
     padding-bottom: var(--dsh-mobile-safe-bottom) !important;
@@ -1288,6 +1287,610 @@ pre, code {
 
   .dsh-update-banner__close:active {
     background: var(--dsw-alias-interactive-bg-hover-solid);
+  }
+}
+
+/* ==========================================================================
+   Real-device screenshot pass — 1320 x 2232 (412 x 697 CSS px)
+   --------------------------------------------------------------------------
+   The reference device is slightly taller than 16:9.5. This pass keeps the
+   official DSH visual language, but makes the useful viewport feel deliberate:
+   one gutter rhythm, readable table columns, stable CJK line breaking, a
+   legible model label and safe clearance above Android's gesture area.
+   ========================================================================== */
+@media (max-width: 1023px) {
+  :root {
+    --dsh-mobile-edge: clamp(8px, 2.15vw, 12px);
+    --dsh-mobile-safe-bottom: max(
+      12px,
+      env(safe-area-inset-bottom, 0px)
+    );
+    --dsh-mobile-content-radius: 14px;
+  }
+
+  body {
+    letter-spacing: 0;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Title, tabs and content share one predictable horizontal rhythm. */
+  .wSkVaW_header,
+  .wSkVaW_header:has(.wSkVaW_tabs) {
+    height: auto !important;
+    min-height: var(--dsh-mobile-header-height) !important;
+  }
+
+  .wSkVaW_header:has(.wSkVaW_tabs) {
+    min-height: calc(var(--dsh-mobile-header-height) + 28px) !important;
+    border-bottom: 0.5px solid var(--dsw-alias-border-l1) !important;
+  }
+
+  .wSkVaW_titleRow {
+    min-height: 32px !important;
+  }
+
+  .wSkVaW_crumb {
+    max-width: min(64vw, 360px) !important;
+    padding: 4px 0 !important;
+    color: var(--dsw-alias-label-primary) !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    line-height: 22px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .wSkVaW_tabs {
+    align-items: flex-start !important;
+    gap: 20px !important;
+    margin-top: 2px !important;
+    padding-left: 0 !important;
+  }
+
+  .wSkVaW_tab {
+    min-height: 32px !important;
+    padding: 0 0 9px !important;
+    color: var(--dsw-alias-label-secondary) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 20px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .wSkVaW_tab::after {
+    right: 0 !important;
+    bottom: -1px !important;
+    left: 0 !important;
+    height: 2px !important;
+    border-radius: 2px !important;
+  }
+
+  .wSkVaW_tabActive {
+    color: var(--dsw-alias-state-business-primary) !important;
+    font-weight: 600 !important;
+  }
+
+  .wSkVaW_tabActive::after {
+    background: var(--dsw-alias-state-business-primary) !important;
+  }
+
+  .wSkVaW_tab::before {
+    content: "";
+    position: absolute;
+    inset: -6px -4px;
+  }
+
+  .wSkVaW_body,
+  .wSkVaW_embeddedBody {
+    --dsh-chat-content-width: calc(
+      100vw - 2 * var(--dsh-mobile-edge)
+    ) !important;
+    --dsh-composer-card-max-width: calc(
+      100vw - 2 * var(--dsh-mobile-edge)
+    ) !important;
+    --dsh-composer-side-clearance: 0px !important;
+    --dsh-composer-dock-inset: 0px !important;
+  }
+
+  .wSkVaW_scrollBody {
+    padding-inline: var(--dsh-mobile-edge) !important;
+    scroll-padding-block:
+      12px
+      calc(var(--dsh-mobile-safe-bottom) + 12px) !important;
+  }
+
+  /* The chat renderer already supplies an outer gutter. Removing its second
+     gutter aligns answer text with the composer card instead of making the
+     two surfaces look unrelated. */
+  [class*="_chat"] [class*="_scroll"]:not([class*="_scrollBody"]),
+  .EvIC1a_scroll {
+    padding-inline: 0 !important;
+  }
+
+  [class*="_markdown_"],
+  [class*="_answer_"],
+  [class*="_message_"] {
+    letter-spacing: 0 !important;
+    line-break: strict;
+    overflow-wrap: break-word;
+    word-break: normal;
+    text-wrap: pretty;
+    font-kerning: normal;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  [class*="_markdown_"] p {
+    margin-block: 12px !important;
+    line-height: calc(
+      23px + var(--dsh-content-font-delta, 0px)
+    ) !important;
+  }
+
+  [class*="_markdown_"] > :first-child,
+  [class*="_markdown_"] p:first-child {
+    margin-top: 0 !important;
+  }
+
+  [class*="_markdown_"] > :last-child,
+  [class*="_markdown_"] p:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  [class*="_markdown_"] :where(h1, h2, h3) {
+    margin: 24px 0 10px !important;
+    letter-spacing: 0 !important;
+    text-wrap: balance;
+  }
+
+  [class*="_markdown_"] :where(h4, h5, h6) {
+    margin: 18px 0 8px !important;
+    font-size: 15.5px !important;
+    font-weight: 600 !important;
+    line-height: 23px !important;
+    letter-spacing: 0 !important;
+    text-wrap: pretty;
+  }
+
+  [class*="_markdown_"] :where(ul, ol) {
+    margin-block: 10px 14px !important;
+    padding-left: 20px !important;
+  }
+
+  [class*="_markdown_"] li {
+    line-height: 1.62 !important;
+  }
+
+  [class*="_markdown_"] li + li {
+    margin-top: 5px !important;
+  }
+
+  /* Weather/data tables: a readable 34/66 split instead of two columns that
+     both collapse to the upstream 30vw maximum and leave orphan characters. */
+  [class*="_tableScroll_"],
+  [class*="tableScroll"],
+  .md-table-wide {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-bottom: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  [class*="_tableScroll_"] > table,
+  [class*="tableScroll"] > table,
+  .md-table-wide > table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  [class*="_tableScroll_"] :is(th, td),
+  [class*="tableScroll"] :is(th, td),
+  .md-table-wide :is(th, td) {
+    box-sizing: border-box !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding: 11px 0 !important;
+    vertical-align: top !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    line-break: strict;
+    font-size: clamp(
+      14px,
+      calc(14px + var(--dsh-content-font-delta, 0px)),
+      15.5px
+    ) !important;
+    line-height: calc(
+      22px + var(--dsh-content-font-delta, 0px)
+    ) !important;
+    text-wrap: balance;
+  }
+
+  [class*="_tableScroll_"] :is(th, td):first-child,
+  [class*="tableScroll"] :is(th, td):first-child,
+  .md-table-wide :is(th, td):first-child {
+    width: 30% !important;
+    padding-right: 12px !important;
+    color: var(--dsw-alias-label-primary) !important;
+    font-weight: 500 !important;
+  }
+
+  [class*="_tableScroll_"] :is(th, td):nth-child(2),
+  [class*="tableScroll"] :is(th, td):nth-child(2),
+  .md-table-wide :is(th, td):nth-child(2) {
+    width: 70% !important;
+    padding-left: 0 !important;
+    font-weight: 400 !important;
+  }
+
+  /* Keep wider data tables usable through their native horizontal scroller
+     instead of forcing the compact two-column proportions onto every table. */
+  [class*="_tableScroll_"]:has(table tr > :nth-child(3)),
+  [class*="tableScroll"]:has(table tr > :nth-child(3)),
+  .md-table-wide:has(table tr > :nth-child(3)) {
+    overflow-x: auto !important;
+  }
+
+  [class*="_tableScroll_"]:has(table tr > :nth-child(3)) > table,
+  [class*="tableScroll"]:has(table tr > :nth-child(3)) > table,
+  .md-table-wide:has(table tr > :nth-child(3)) > table {
+    width: max-content !important;
+    min-width: 100% !important;
+    max-width: max-content !important;
+    table-layout: auto !important;
+  }
+
+  [class*="_tableScroll_"]:has(table tr > :nth-child(3))
+    > table
+    :is(th, td),
+  [class*="tableScroll"]:has(table tr > :nth-child(3))
+    > table
+    :is(th, td),
+  .md-table-wide:has(table tr > :nth-child(3)) > table :is(th, td) {
+    width: auto !important;
+    min-width: 100px !important;
+    padding-inline: 12px !important;
+  }
+
+  [class*="_tableScroll_"]:has(table tr > :nth-child(3))
+    > table
+    :is(th, td):first-child,
+  [class*="tableScroll"]:has(table tr > :nth-child(3))
+    > table
+    :is(th, td):first-child,
+  .md-table-wide:has(table tr > :nth-child(3))
+    > table
+    :is(th, td):first-child {
+    padding-left: 0 !important;
+  }
+
+  [class*="_tableScroll_"]:has(table tr > :nth-child(3))
+    > table
+    :is(th, td):last-child,
+  [class*="tableScroll"]:has(table tr > :nth-child(3))
+    > table
+    :is(th, td):last-child,
+  .md-table-wide:has(table tr > :nth-child(3))
+    > table
+    :is(th, td):last-child {
+    padding-right: 0 !important;
+  }
+
+  [class*="_tableScroll_"] tr:first-child > td,
+  [class*="tableScroll"] tr:first-child > td,
+  .md-table-wide tr:first-child > td {
+    border-top: 0.5px solid var(--dsw-alias-border-l2) !important;
+  }
+
+  /* Composer: one quiet surface, one blue primary action, no accidental
+     clipping under the gesture area. */
+  .uV2eYG_root {
+    padding:
+      0
+      0
+      max(8px, var(--dsh-mobile-safe-bottom))
+      !important;
+  }
+
+  .uV2eYG_card {
+    border-radius: 18px !important;
+    gap: 8px !important;
+    box-shadow:
+      0 8px 26px rgba(0, 0, 0, 0.075),
+      0 0 0 0.5px var(--dsw-alias-border-l1) !important;
+  }
+
+  .uV2eYG_input {
+    min-height: 42px !important;
+    padding: 6px 10px 0 14px !important;
+    line-height: 24px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .uV2eYG_placeholder {
+    inset: 6px 10px auto 14px !important;
+    color: var(--dsw-alias-label-secondary) !important;
+    white-space: normal !important;
+    line-height: 1.4 !important;
+    text-overflow: clip !important;
+    letter-spacing: 0 !important;
+  }
+
+  .uV2eYG_row {
+    min-height: 46px !important;
+    padding: 2px 6px 6px !important;
+    gap: 8px !important;
+  }
+
+  .uV2eYG_tools,
+  .uV2eYG_modes,
+  .uV2eYG_trailing,
+  .uV2eYG_standardControls {
+    gap: 6px !important;
+  }
+
+  .uV2eYG_primary {
+    width: 40px !important;
+    height: 40px !important;
+    transform: none !important;
+    background: var(--dsw-alias-button-info-fill) !important;
+    color: #fff !important;
+    opacity: 1 !important;
+  }
+
+  .uV2eYG_primary:disabled {
+    background: var(--dsw-alias-button-info-fill) !important;
+    opacity: 0.38 !important;
+  }
+
+  .uV2eYG_add {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .uV2eYG_row[data-model-compact] {
+    --dsh-composer-model-text-display: block;
+    --dsh-composer-model-icon-display: none;
+  }
+
+  [class*="_7KE1Ra_trigger"] {
+    height: auto !important;
+    min-height: 36px !important;
+    max-width: 45cqw !important;
+    min-width: 0 !important;
+    gap: 2px !important;
+    padding: 7px 4px !important;
+    align-items: center !important;
+    font-size: 13px !important;
+    line-height: 20px !important;
+    letter-spacing: 0 !important;
+  }
+
+  [class*="_7KE1Ra_triggerIcon"] {
+    display: none !important;
+  }
+
+  [class*="_7KE1Ra_triggerLabel"] {
+    flex: 0 1 auto !important;
+    min-width: 4ch !important;
+    display: block !important;
+    overflow: visible;
+    white-space: normal;
+    line-height: 20px !important;
+    overflow-wrap: normal;
+    letter-spacing: 0 !important;
+  }
+
+  [class*="_7KE1Ra_triggerEffort"] {
+    flex: 0 1 auto !important;
+    max-width: 6ch !important;
+    letter-spacing: 0 !important;
+  }
+
+  [data-composer-stat] {
+    min-width: 0;
+    color: var(--dsw-alias-label-secondary) !important;
+    font-size: 11.5px !important;
+    line-height: 18px !important;
+    letter-spacing: 0 !important;
+  }
+
+  [data-composer-stat] > button,
+  [data-composer-stat] > span {
+    gap: 4px !important;
+    padding-inline: 4px !important;
+  }
+
+  [data-composer-stat] > button {
+    position: relative;
+  }
+
+  [data-composer-stat] > button::after {
+    content: "";
+    position: absolute;
+    inset: -10px 0;
+  }
+
+  [data-composer-stat] svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .uV2eYG_dock {
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 6px !important;
+    padding: 5px 6px 0 !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .uV2eYG_dock::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Reserve a small, intentional end-of-transcript breathing space. */
+  .EvIC1a_column::after {
+    content: "";
+    display: block;
+    flex: none;
+    height: 32px;
+  }
+
+  /* Keep "back to bottom" in the empty upper-right corner of the composer,
+     never over a paragraph. The Android shell reports the two measured heights
+     so the button follows one-line and expanded composer states. */
+  [class*="_toBottomSlot"] {
+    position: fixed !important;
+    z-index: 8 !important;
+    right: calc(var(--dsh-mobile-edge) + 11px) !important;
+    bottom: calc(
+      var(--dsh-mobile-safe-bottom) +
+      var(--dsh-mobile-composer-dock-height, 25px) +
+      var(--dsh-mobile-composer-card-height, 116px) -
+      42px
+    ) !important;
+    left: auto !important;
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  [class*="_toBottomSlot"] > button,
+  [class*="_toBottom"]:is(button, [role="button"]) {
+    width: 38px !important;
+    height: 38px !important;
+    margin-top: 0 !important;
+    border: 0.5px solid var(--dsw-alias-border-l2) !important;
+    border-radius: 999px !important;
+    color: var(--dsw-alias-label-secondary) !important;
+    background: var(--dsw-specific-input-major) !important;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.09) !important;
+    backdrop-filter: blur(10px) saturate(125%);
+  }
+
+  [class*="_toBottomSlot"] > button::after,
+  [class*="_toBottom"]:is(button, [role="button"])::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+  }
+
+  [class*="_toBottomSlot"] > button,
+  [class*="_toBottom"]:is(button, [role="button"]) {
+    position: relative;
+  }
+
+  .wSkVaW_root:has([class*="_toBottomSlot"]) .uV2eYG_input {
+    padding-right: 50px !important;
+  }
+
+  .wSkVaW_root:has([class*="_toBottomSlot"]) .uV2eYG_placeholder {
+    right: 50px !important;
+  }
+
+  [class*="_toBottomSlot"] > button:active,
+  [class*="_toBottom"]:is(button, [role="button"]):active {
+    background: var(--dsw-alias-interactive-bg-hover-solid) !important;
+  }
+
+  [class*="_shortcutKeys_"] [class*="_key_"] {
+    color: var(--dsw-alias-label-secondary) !important;
+  }
+
+  /* At large system text sizes, give the model control a complete second row
+     instead of forcing a three-line wrap inside the one-line toolbar. */
+  html.dsh-mobile-large-text .uV2eYG_row {
+    flex-wrap: wrap !important;
+    gap: 4px 8px !important;
+  }
+
+  html.dsh-mobile-large-text .uV2eYG_input {
+    min-height: 86px !important;
+  }
+
+  html.dsh-mobile-large-text .uV2eYG_scroll {
+    max-height: none !important;
+    overflow-y: hidden !important;
+  }
+
+  html.dsh-mobile-large-text .uV2eYG_tools {
+    flex: 1 1 auto !important;
+  }
+
+  html.dsh-mobile-large-text .uV2eYG_trailing {
+    flex: 1 0 100% !important;
+    width: 100% !important;
+    justify-content: flex-end !important;
+    margin-left: 0 !important;
+  }
+
+  html.dsh-mobile-large-text [class*="_7KE1Ra_trigger"] {
+    max-width: 70cqw !important;
+  }
+
+  html.dsh-mobile-large-text [class*="_7KE1Ra_triggerLabel"] {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+  }
+
+  html.dsh-mobile-large-text .uV2eYG_dock {
+    justify-content: flex-start !important;
+  }
+
+  html.dsh-mobile-large-text [data-composer-stat] [class*="_label_"] {
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  html.dsh-mobile-large-text [data-composer-stat] {
+    flex: 0 0 auto !important;
+  }
+
+  html.dsh-mobile-large-text [data-composer-stat] > :is(button, span) {
+    max-width: none !important;
+  }
+
+  @media (orientation: landscape) and (max-height: 540px) {
+    .uV2eYG_dock {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 380px) {
+    :root {
+      --dsh-mobile-edge: 8px;
+    }
+
+    .wSkVaW_tabs {
+      gap: 16px !important;
+    }
+
+    [class*="_markdown_"] :is(th, td),
+    [class*="_tableScroll_"] :is(th, td) {
+      font-size: 13px !important;
+      line-height: 20px !important;
+    }
+
+    [class*="_tableScroll_"] :is(th, td):first-child,
+    [class*="tableScroll"] :is(th, td):first-child,
+    .md-table-wide :is(th, td):first-child {
+      width: 26% !important;
+    }
+
+    [class*="_tableScroll_"] :is(th, td):nth-child(2),
+    [class*="tableScroll"] :is(th, td):nth-child(2),
+    .md-table-wide :is(th, td):nth-child(2) {
+      width: 74% !important;
+    }
+
+    [class*="_7KE1Ra_trigger"] {
+      max-width: 47cqw !important;
+    }
   }
 }
 

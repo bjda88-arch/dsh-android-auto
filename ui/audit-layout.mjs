@@ -82,6 +82,18 @@ if (process.env.CLICK_TEXTS) {
     await page.waitForTimeout(700);
   }
 }
+if (process.env.CLICK_LABELS) {
+  for (const wanted of process.env.CLICK_LABELS.split(";")) {
+    const label = wanted.trim();
+    if (!label) continue;
+    await page.evaluate((exactLabel) => {
+      const candidate = [...document.querySelectorAll("button, [role=button]")]
+        .find((el) => (el.getAttribute("aria-label") || "").startsWith(exactLabel));
+      if (candidate) candidate.click();
+    }, label);
+    await page.waitForTimeout(700);
+  }
+}
 
 const audit = await page.evaluate(() => {
   const describe = (el) => {

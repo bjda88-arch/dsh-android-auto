@@ -38,10 +38,13 @@ Rules:
 - Family: upstream DSH/platform sans stack.
 - App title: 18px, 600.
 - Hero title: upstream DSH 26px.
-- Body/input: at least 15px visual size; editable input remains 16px.
+- Body/input: 14–15px visual size; editable input remains 16px.
 - Secondary text: 13px.
 - Caption/meta: 11.5–12px.
 - Body line height: 1.55–1.62.
+- Chinese UI and answer text use zero added tracking.
+- Markdown body uses 14px/23px on compact phones; table cells use 13–14px with
+  strict CJK line breaking and balanced short values.
 - Numerals: tabular for progress, tokens, durations and counts.
 - WebView text zoom follows Android accessibility font scale from 85% to 150%.
 
@@ -56,10 +59,14 @@ Rules:
 ## Spacing
 
 - Base rhythm: 4px, preferring 8px grouping increments.
-- Screen gutters: 6–10px on phones; up to 24px on wider layouts.
+- Screen gutters: 8–12px on phones; up to 24px on wider layouts.
 - Header: about 44–48px plus the system safe-area inset.
 - Touch targets: 44px minimum; 48px for the visible menu hit area.
-- Composer: 94–97% of viewport width on target phones.
+- Composer and answer content share the same gutter and use 95–97% of viewport
+  width on target phones.
+- Two-column answer tables use a 30/70 label/value split on the primary phone.
+- The composer preserves at least 12px below its metadata for Android gesture
+  navigation.
 
 ## Icons
 
@@ -95,3 +102,5 @@ Rules:
 - Do not add a custom edge-swipe that competes with system back navigation.
 - Settings is a full-screen modal sheet with quiet text tabs and an underline
   for the current page.
+- The return-to-bottom control belongs to the composer's quiet upper-right
+  area, not the readable transcript.

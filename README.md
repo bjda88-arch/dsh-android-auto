@@ -3,28 +3,38 @@
 This repository builds a private-signing Android release of DeepSeek Harness and
 follows the official DeepSeek Harness release feed.
 
-Current release: `v1.45.5`, with DSH `0.2.1-rc.2`.
+Current release: `v1.45.6`, with DSH `0.2.1-rc.2`.
 
-| Portrait 16:9.5 | Landscape 16:9.5 | Navigation drawer |
+| Portrait 412 × 697 | Dark answer | Navigation drawer |
 | --- | --- | --- |
-| ![Portrait](docs/screenshots/portrait-16x9.5.png) | ![Landscape](docs/screenshots/landscape-16x9.5.png) | ![Drawer](docs/screenshots/drawer-16x9.5.png) |
-| ![Light boot](docs/screenshots/boot-light-16x9.5.png) | ![Dark boot](docs/screenshots/boot-dark-16x9.5.png) | ![Settings](docs/screenshots/settings-light-16x9.5.png) |
+| ![Portrait conversation](docs/screenshots/portrait-412x697.png) | ![Dark conversation](docs/screenshots/content-dark-412x697.png) | ![Drawer](docs/screenshots/drawer-412x697.png) |
+| ![Light boot](docs/screenshots/boot-light-412x697.png) | ![Landscape](docs/screenshots/landscape-697x412.png) | ![Dark boot](docs/screenshots/boot-dark-412x697.png) |
 
 ## Mobile UI
 
-The Android UI is tuned for a 16:9.5 display in both orientations:
+The primary geometry comes from the supplied 1320 × 2232 device capture,
+which maps to a 412 × 697 CSS viewport (approximately 1:1.691 portrait):
 
 - the collapsed sidebar rail no longer consumes content width;
 - navigation uses a full-height overlay drawer with a visible 48px hit area and
   Android hardware-back dismissal, without competing with system edge gestures;
 - the header is reduced to 48px portrait / 44px landscape;
-- the conversation and composer use nearly the full viewport width;
+- the title and tab baseline share the same 58px leading edge, while the answer
+  and composer share a single 9px content gutter;
+- answer text uses zero tracking, strict CJK line breaking and a 30/70 table
+  split so values do not collapse into orphan-character lines;
+- the model label receives enough width to stay readable instead of clipping
+  the model name;
+- the composer keeps a 12px minimum bottom clearance and its metadata remains
+  above Android's gesture area;
+- the return-to-bottom control moves into the quiet upper-right composer area,
+  where it cannot cover prose;
 - safe-area, software-keyboard, touch-target and landscape rules are bundled;
 - Android system font scaling is passed into WebView (85%–150%, safely clamped);
 - the boot screen uses cover scaling, so the display is not letterboxed.
 
 The source of the mobile override is under [`ui/`](ui/).
-See the full [16:9.5 UI/UX audit](docs/ui-audit-16x9.5.md) for measurements and
+See the full [real-device UI/UX audit](docs/ui-audit-real-device.md) for measurements and
 the remaining physical-device checks.
 Shared visual rules live in the
 [DSH Mobile design system](design-system/dsh-mobile/MASTER.md).

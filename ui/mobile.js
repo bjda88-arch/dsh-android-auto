@@ -270,7 +270,7 @@
 })();
 
 /**
- * 16:9.5 mobile shell polish.
+ * Real-device mobile shell polish.
  *
  * Geometry is owned by mobile.css. This layer only supplies behaviours that
  * CSS cannot express:
@@ -283,6 +283,10 @@
   var root = document.documentElement;
   var lastDrawerOpen = null;
   var syncTimer = 0;
+  var composerObserver = null;
+  var observedComposerCard = null;
+  var observedComposerDock = null;
+  var composerDiscoveryObserver = null;
 
   function menuButton() {
     return document.querySelector('.dsh-mobile-menu-btn');
@@ -314,7 +318,92 @@
     root.setAttribute('data-dsh-mobile', w < 1024 ? '1' : '0');
     root.setAttribute('data-dsh-mobile-orientation', h >= w ? 'portrait' : 'landscape');
     root.style.setProperty('--dsh-mobile-visual-height', h + 'px');
+    var bodyFontSize = parseFloat(getComputedStyle(document.body).fontSize);
+    root.classList.toggle(
+      'dsh-mobile-large-text',
+      Number.isFinite(bodyFontSize) && bodyFontSize > 17
+    );
+    syncComposerMetrics();
     syncDrawerState();
+  }
+
+  function publishComposerMetrics() {
+    var card = document.querySelector('[data-composer-card]');
+    var dock = document.querySelector('[data-composer-dock]');
+    if (card) {
+      root.style.setProperty(
+        '--dsh-mobile-composer-card-height',
+        Math.round(card.getBoundingClientRect().height * 100) / 100 + 'px'
+      );
+    }
+    if (dock) {
+      root.style.setProperty(
+        '--dsh-mobile-composer-dock-height',
+        Math.round(dock.getBoundingClientRect().height * 100) / 100 + 'px'
+      );
+    }
+    var inputScroll = document.querySelector('[data-input-scroll]');
+    if (inputScroll) {
+      var isScrollable = inputScroll.scrollHeight > inputScroll.clientHeight + 1;
+      if (isScrollable) {
+        inputScroll.tabIndex = 0;
+        inputScroll.setAttribute('role', 'region');
+        inputScroll.setAttribute('aria-label', '消息输入内容');
+        inputScroll.setAttribute('data-dsh-scroll-focus', 'true');
+      } else if (inputScroll.getAttribute('data-dsh-scroll-focus') === 'true') {
+        inputScroll.removeAttribute('tabindex');
+        inputScroll.removeAttribute('role');
+        inputScroll.removeAttribute('aria-label');
+        inputScroll.removeAttribute('data-dsh-scroll-focus');
+      }
+    }
+  }
+
+  function syncComposerMetrics() {
+    var card = document.querySelector('[data-composer-card]');
+    var dock = document.querySelector('[data-composer-dock]');
+    if (!card || !dock) return;
+    if (card === observedComposerCard && dock === observedComposerDock) {
+      publishComposerMetrics();
+      return;
+    }
+
+    if (composerObserver) composerObserver.disconnect();
+    observedComposerCard = card;
+    observedComposerDock = dock;
+    publishComposerMetrics();
+
+    if (typeof ResizeObserver !== 'function') return;
+    composerObserver = new ResizeObserver(publishComposerMetrics);
+    composerObserver.observe(card);
+    composerObserver.observe(dock);
+    if (composerDiscoveryObserver) {
+      composerDiscoveryObserver.disconnect();
+      composerDiscoveryObserver = null;
+    }
+  }
+
+  function watchForComposer() {
+    if (
+      document.querySelector('[data-composer-card]') &&
+      document.querySelector('[data-composer-dock]')
+    ) {
+      syncComposerMetrics();
+      return;
+    }
+    if (typeof MutationObserver !== 'function') return;
+    composerDiscoveryObserver = new MutationObserver(function () {
+      syncComposerMetrics();
+    });
+    composerDiscoveryObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+    setTimeout(function () {
+      if (!composerDiscoveryObserver) return;
+      composerDiscoveryObserver.disconnect();
+      composerDiscoveryObserver = null;
+    }, 20000);
   }
 
   function scheduleSync() {
@@ -346,6 +435,12 @@
     setTimeout(closeDrawer, 100);
   }, true);
 
+  document.addEventListener('input', function (event) {
+    if (!event.target || !event.target.closest) return;
+    if (!event.target.closest('[data-composer-card]')) return;
+    requestAnimationFrame(publishComposerMetrics);
+  }, true);
+
   window.addEventListener('resize', markViewport, { passive: true });
   window.addEventListener('orientationchange', function () {
     setTimeout(markViewport, 160);
@@ -355,10 +450,14 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
       markViewport();
+      setTimeout(syncComposerMetrics, 120);
+      watchForComposer();
       root.classList.add('dsh-mobile-ready');
     });
   } else {
     markViewport();
+    setTimeout(syncComposerMetrics, 120);
+    watchForComposer();
     root.classList.add('dsh-mobile-ready');
   }
 })();
