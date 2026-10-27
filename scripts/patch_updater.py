@@ -61,6 +61,14 @@ def main() -> None:
     )
     text = replace_once(text, anchor, replacement)
 
+    text = replace_once(
+        text,
+        "        ws.setTextZoom(100);\n",
+        "        int systemFontScale = Math.round("
+        "getResources().getConfiguration().fontScale * 100f);\n"
+        "        ws.setTextZoom(Math.max(85, Math.min(150, systemFontScale)));\n",
+    )
+
     args.main_activity.write_text(text, encoding="utf-8")
 
 
