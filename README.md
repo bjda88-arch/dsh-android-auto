@@ -8,6 +8,7 @@ Current release: `v1.45.4`, with DSH `0.2.1-rc.2`.
 | Portrait 16:9.5 | Landscape 16:9.5 | Navigation drawer |
 | --- | --- | --- |
 | ![Portrait](docs/screenshots/portrait-16x9.5.png) | ![Landscape](docs/screenshots/landscape-16x9.5.png) | ![Drawer](docs/screenshots/drawer-16x9.5.png) |
+| ![Light boot](docs/screenshots/boot-light-16x9.5.png) | ![Dark boot](docs/screenshots/boot-dark-16x9.5.png) | ![Settings](docs/screenshots/settings-light-16x9.5.png) |
 
 ## Mobile UI
 
@@ -25,6 +26,8 @@ The Android UI is tuned for a 16:9.5 display in both orientations:
 The source of the mobile override is under [`ui/`](ui/).
 See the full [16:9.5 UI/UX audit](docs/ui-audit-16x9.5.md) for measurements and
 the remaining physical-device checks.
+Shared visual rules live in the
+[DSH Mobile design system](design-system/dsh-mobile/MASTER.md).
 
 ## Update model
 
