@@ -14,13 +14,17 @@ Current release: `v1.45.3`, with DSH `0.2.1-rc.2`.
 The Android UI is tuned for a 16:9.5 display in both orientations:
 
 - the collapsed sidebar rail no longer consumes content width;
-- navigation uses a full-height overlay drawer with edge-swipe support;
-- the header is reduced to 48px portrait / 42px landscape;
+- navigation uses a full-height overlay drawer with a visible 48px hit area and
+  Android hardware-back dismissal, without competing with system edge gestures;
+- the header is reduced to 48px portrait / 44px landscape;
 - the conversation and composer use nearly the full viewport width;
 - safe-area, software-keyboard, touch-target and landscape rules are bundled;
+- Android system font scaling is passed into WebView (85%–150%, safely clamped);
 - the boot screen uses cover scaling, so the display is not letterboxed.
 
 The source of the mobile override is under [`ui/`](ui/).
+See the full [16:9.5 UI/UX audit](docs/ui-audit-16x9.5.md) for measurements and
+the remaining physical-device checks.
 
 ## Update model
 
