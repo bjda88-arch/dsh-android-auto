@@ -76,8 +76,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p work/gen/com/deepseek/harness work/classes work/dex work/aar
-          base_url=$(gh release view "$PORT_TAG" --repo "$PORT_REPO" \
-            --json assets --jq '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' | head -1)
+          base_url=$(gh api "repos/$PORT_REPO/releases/tags/$PORT_TAG" \
+            --jq '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' | head -1)
           test -n "$base_url"
           curl -fL --retry 4 --retry-all-errors "$base_url" -o work/base.apk
 
