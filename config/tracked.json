@@ -1,0 +1,7 @@
+{
+  "official_repo": "deepseek-ai/deepseek-harness",
+  "android_repo": "guzhou079-arch/deepseek-harness-android",
+  "release_repo": "bjda88-arch/dsh-android-auto",
+  "package_name": "com.deepseek.harness",
+  "minimum_port_tag": "v1.45"
+}
