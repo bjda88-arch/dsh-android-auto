@@ -3,6 +3,8 @@
 This repository builds a private-signing Android release of DeepSeek Harness and
 follows the official DeepSeek Harness release feed.
 
+Current release: `v1.45.1`, with DSH `0.2.1-rc.2`.
+
 ## Update model
 
 1. GitHub Actions checks the official `deepseek-ai/deepseek-harness` releases.
@@ -24,6 +26,10 @@ The repository and its Releases must be publicly readable for an installed
 Android app to check updates without embedding a GitHub token. A private
 repository can still run the build workflow, but cannot serve anonymous update
 checks to the phone.
+
+This repository is public and contains build sources, workflows, release notes,
+and signed APKs. Signing keys are stored only in repository secrets and are
+never committed.
 
 ## Build
 
