@@ -672,8 +672,8 @@ pre, code {
    neutral surfaces, one blue accent, restrained borders and no decorative
    chrome. The mobile adaptation only changes geometry and touch ergonomics.
 
-   Primary target  : 412 x 697 CSS px (1320 x 2232 at 3.2x)
-   Landscape target: 697 x 412 CSS px
+   Primary target  : 440 x 744 CSS px (1320 x 2232 at 3x)
+   Landscape target: 744 x 440 CSS px
    ========================================================================== */
 
 @media (max-width: 1023px) {
@@ -976,9 +976,9 @@ pre, code {
     }
   }
 
-  [class*="_sidebarCol"] [class*="_newSession"],
+  [class*="_sidebarCol"] button[class*="_newSession"],
   [class*="_sidebarCol"] [class*="_panelRow"],
-  [class*="_sidebarCol"] [class*="_trigger"] {
+  [class*="_sidebarCol"] button[class*="_trigger"] {
     min-height: 44px !important;
     border-radius: 10px !important;
   }
@@ -1291,7 +1291,7 @@ pre, code {
 }
 
 /* ==========================================================================
-   Real-device screenshot pass — 1320 x 2232 (412 x 697 CSS px)
+   Real-device screenshot pass — 1320 x 2232 (440 x 744 CSS px)
    --------------------------------------------------------------------------
    The reference device is slightly taller than 16:9.5. This pass keeps the
    official DSH visual language, but makes the useful viewport feel deliberate:
@@ -1371,6 +1371,16 @@ pre, code {
 
   .wSkVaW_tabActive::after {
     background: var(--dsw-alias-state-business-primary) !important;
+  }
+
+  .wSkVaW_tab:active {
+    color: var(--dsw-alias-label-primary) !important;
+    background: var(--dsw-alias-interactive-bg-hover) !important;
+  }
+
+  .wSkVaW_headerCorner button:active,
+  .wSkVaW_headerActions button:active {
+    background: var(--dsw-alias-interactive-bg-hover) !important;
   }
 
   .wSkVaW_tab::before {
@@ -1653,7 +1663,7 @@ pre, code {
     --dsh-composer-model-icon-display: none;
   }
 
-  [class*="_7KE1Ra_trigger"] {
+  button[class*="_7KE1Ra_trigger"] {
     height: auto !important;
     min-height: 36px !important;
     max-width: 45cqw !important;
@@ -1828,7 +1838,7 @@ pre, code {
     margin-left: 0 !important;
   }
 
-  html.dsh-mobile-large-text [class*="_7KE1Ra_trigger"] {
+  html.dsh-mobile-large-text button[class*="_7KE1Ra_trigger"] {
     max-width: 70cqw !important;
   }
 
@@ -1888,8 +1898,254 @@ pre, code {
       width: 74% !important;
     }
 
-    [class*="_7KE1Ra_trigger"] {
+    button[class*="_7KE1Ra_trigger"] {
       max-width: 47cqw !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Conversation + navigation drawer refinement — 440 x 744 CSS px
+   --------------------------------------------------------------------------
+   The two supplied 1320 x 2232 screenshots resolve to the same 3x device
+   viewport. This pass tightens the conversation surface and fixes the drawer
+   geometry, close affordance and footer safe area.
+   ========================================================================== */
+@media (max-width: 1023px) {
+  /* A useful title hierarchy without making the compact header heavy. */
+  .wSkVaW_crumb {
+    font-size: 18px !important;
+    line-height: 24px !important;
+    font-weight: 600 !important;
+  }
+
+  /* Disabled send is neutral; DSH blue is reserved for the enabled action. */
+  .uV2eYG_primary:disabled {
+    color: var(--dsw-alias-label-tertiary) !important;
+    background: var(--dsw-alias-interactive-bg-hover-solid) !important;
+    opacity: 1 !important;
+  }
+
+  .uV2eYG_input {
+    min-height: 40px !important;
+  }
+
+  .uV2eYG_row {
+    min-height: 44px !important;
+    padding-block: 2px 4px !important;
+  }
+
+  /* Data labels read as labels; values keep the strongest text contrast. */
+  [class*="_tableScroll_"] :is(th, td):first-child,
+  [class*="tableScroll"] :is(th, td):first-child,
+  .md-table-wide :is(th, td):first-child {
+    color: var(--dsw-alias-label-secondary) !important;
+    font-size: clamp(
+      13px,
+      calc(13px + var(--dsh-content-font-delta, 0px)),
+      14px
+    ) !important;
+    font-weight: 500 !important;
+  }
+
+  [class*="_tableScroll_"] :is(th, td):nth-child(2),
+  [class*="tableScroll"] :is(th, td):nth-child(2),
+  .md-table-wide :is(th, td):nth-child(2) {
+    color: var(--dsw-alias-label-primary) !important;
+    font-size: clamp(
+      14px,
+      calc(14px + var(--dsh-content-font-delta, 0px)),
+      15.5px
+    ) !important;
+  }
+
+  [class*="_markdown_"] p[data-dsh-token-line] {
+    text-wrap: balance !important;
+  }
+
+  /* The overlay drawer must be border-box all the way down. Before this, the
+     padded wrapper was wider than the panel and the content's right edge was
+     clipped against the rounded drawer edge. */
+  .pI_x6G_sidebarCol[style*="position: fixed"] > div,
+  body:has(.dsh-mobile-scrim) .pI_x6G_sidebarCol > div {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .pI_x6G_sidebarCol[style*="position: fixed"] > div > div[class*="_root"],
+  body:has(.dsh-mobile-scrim) .pI_x6G_sidebarCol > div > div[class*="_root"] {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    padding: 6px 10px !important;
+    --dsh-sidebar-inline-padding: 10px;
+  }
+
+  .pI_x6G_sidebarCol [class*="_logoRow"],
+  .pI_x6G_sidebarCol [class*="_panelList"],
+  .pI_x6G_sidebarCol [class*="_regionArea"],
+  .pI_x6G_sidebarCol [class*="_footArea"] {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .pI_x6G_sidebarCol button[class*="_newSession"],
+  .pI_x6G_sidebarCol [class*="_panelRow"] {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    margin-inline: 0 !important;
+  }
+
+  .pI_x6G_sidebarCol [class*="_regionArea"] {
+    margin-inline: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  /* The logo is identity, not a second "new conversation" control. */
+  .pI_x6G_sidebarCol button[class*="_brand"] {
+    pointer-events: none !important;
+    cursor: default !important;
+  }
+
+  /* Replace the ambiguous split-pane glyph with a conventional close cross. */
+  .pI_x6G_sidebarCol [class*="_toggle"] {
+    position: relative !important;
+    border-radius: 12px !important;
+    color: var(--dsw-alias-label-secondary) !important;
+    background: var(--dsw-alias-interactive-bg-hover) !important;
+  }
+
+  .pI_x6G_sidebarCol [class*="_toggle"] svg {
+    display: none !important;
+  }
+
+  .pI_x6G_sidebarCol [class*="_toggle"]::before,
+  .pI_x6G_sidebarCol [class*="_toggle"]::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 15px;
+    height: 1.5px;
+    border-radius: 2px;
+    background: currentColor;
+    transform-origin: center;
+  }
+
+  .pI_x6G_sidebarCol [class*="_toggle"]::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+
+  .pI_x6G_sidebarCol [class*="_toggle"]::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+  }
+
+  .pI_x6G_sidebarCol [class*="_toggle"]:active {
+    background: var(--dsw-alias-interactive-bg-active) !important;
+  }
+
+  html.dsh-mobile-touch-focus
+    .pI_x6G_sidebarCol
+    [class*="_toggle"]:focus-visible,
+  html.dsh-mobile-touch-focus .dsh-mobile-menu-btn:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Section labels are quieter than the destinations they introduce. */
+  .pI_x6G_sidebarCol [class*="_sectionLabel"] {
+    color: var(--dsw-alias-label-secondary) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 18px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pI_x6G_sidebarCol button[class*="_newSession"] {
+    background: var(--dsw-alias-bg-layer-1) !important;
+    border-color: var(--dsw-alias-border-l2) !important;
+  }
+
+  .pI_x6G_sidebarCol button[class*="_newSession"]:active {
+    background: var(--dsw-alias-interactive-bg-hover-solid) !important;
+  }
+
+  .pI_x6G_sidebarCol [class*="_panelRow"]:active {
+    background: var(--dsw-alias-interactive-bg-hover-solid) !important;
+  }
+
+  /* Give the features disclosure a real direction indicator. */
+  .pI_x6G_sidebarCol button[aria-label="功能入口"] {
+    position: relative;
+    padding-right: 24px !important;
+  }
+
+  .pI_x6G_sidebarCol button[aria-label="功能入口"]::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    opacity: 0.55;
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform 140ms ease-out;
+  }
+
+  .pI_x6G_sidebarCol button[aria-label="功能入口"][aria-expanded="true"]::after {
+    transform: rotate(225deg) translate(-2px, -2px);
+  }
+
+  /* Use SVG geometry for the feature glyph instead of the "▦" text glyph. */
+  .pI_x6G_sidebarCol
+    button[aria-label="功能入口"]
+    [class*="_panelGlyph"] {
+    width: 16px;
+    height: 16px;
+    font-size: 0 !important;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Crect x='2' y='2' width='4.5' height='4.5' rx='.5'/%3E%3Crect x='9.5' y='2' width='4.5' height='4.5' rx='.5'/%3E%3Crect x='2' y='9.5' width='4.5' height='4.5' rx='.5'/%3E%3Crect x='9.5' y='9.5' width='4.5' height='4.5' rx='.5'/%3E%3C/g%3E%3C/svg%3E")
+      center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Crect x='2' y='2' width='4.5' height='4.5' rx='.5'/%3E%3Crect x='9.5' y='2' width='4.5' height='4.5' rx='.5'/%3E%3Crect x='2' y='9.5' width='4.5' height='4.5' rx='.5'/%3E%3Crect x='9.5' y='9.5' width='4.5' height='4.5' rx='.5'/%3E%3C/g%3E%3C/svg%3E")
+      center / contain no-repeat;
+  }
+
+  /* Make the bottom utility row feel intentional and keep it above gesture
+     navigation on every drawer height. */
+  .pI_x6G_sidebarCol [class*="_footArea"] {
+    border-top: 0.5px solid var(--dsw-alias-border-l1) !important;
+    margin-top: 8px !important;
+    padding-top: 4px !important;
+  }
+
+  .pI_x6G_sidebarCol [class*="_settingsArea"],
+  .pI_x6G_sidebarCol [class*="_triggerRow"],
+  .pI_x6G_sidebarCol button[class*="_trigger"] {
+    width: 100% !important;
+  }
+
+  .pI_x6G_sidebarCol [class*="_triggerRow"] {
+    margin: 0 !important;
+  }
+
+  .pI_x6G_sidebarCol button[class*="_trigger"] {
+    min-height: 48px !important;
+    padding: 7px 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .pI_x6G_sidebarCol button[class*="_trigger"]:active {
+    background: var(--dsw-alias-interactive-bg-hover) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pI_x6G_sidebarCol button[aria-label="功能入口"]::after {
+      transition: none;
     }
   }
 }

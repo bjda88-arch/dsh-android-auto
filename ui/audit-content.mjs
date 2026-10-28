@@ -5,11 +5,12 @@ import path from "node:path";
 const url = process.env.DSH_PREVIEW_URL;
 if (!url) throw new Error("DSH_PREVIEW_URL is required");
 
-const width = Number(process.env.VIEWPORT_WIDTH || 412);
-const height = Number(process.env.VIEWPORT_HEIGHT || 697);
+const width = Number(process.env.VIEWPORT_WIDTH || 440);
+const height = Number(process.env.VIEWPORT_HEIGHT || 744);
 const colorScheme = process.env.COLOR_SCHEME || "light";
 const scrollMode = process.env.SCROLL_MODE || "bottom";
 const textScale = Number(process.env.TEXT_SCALE || 100);
+const deviceScaleFactor = Number(process.env.DEVICE_SCALE_FACTOR || 3);
 const cssPath = path.resolve(process.env.CSS_PATH || "ui/mobile.css");
 const jsPath = process.env.JS_PATH
   ? path.resolve(process.env.JS_PATH)
@@ -29,7 +30,7 @@ const browser = await chromium.launch({
 });
 const context = await browser.newContext({
   viewport: { width, height },
-  deviceScaleFactor: 2,
+  deviceScaleFactor,
   isMobile: true,
   hasTouch: true,
   colorScheme,
@@ -217,6 +218,13 @@ await page.evaluate((scrollMode) => {
 }, scrollMode);
 
 await page.waitForTimeout(500);
+if (process.env.BALANCE_ARROWS === "1") {
+  await page.addStyleTag({
+    content:
+      '[class*="_markdown_"] p { text-wrap: balance !important; }',
+  });
+  await page.waitForTimeout(100);
+}
 const metrics = await page.evaluate(() => {
   const box = (selector) => {
     const el = document.querySelector(selector);
@@ -267,6 +275,37 @@ const metrics = await page.evaluate(() => {
     tableColumns: tableCells.map((cell) => Math.round(cell.getBoundingClientRect().width)),
     paragraph: box("._markdown_1ypvv_5 p"),
     composer: composerBox,
+    composerChildren: (() => {
+      const card = document.querySelector("[data-composer-card]");
+      if (!card) return [];
+      return [...card.children].map((child) => {
+        const r = child.getBoundingClientRect();
+        return {
+          class: child.className?.toString().slice(0, 120),
+          x: Math.round(r.x * 10) / 10,
+          y: Math.round(r.y * 10) / 10,
+          width: Math.round(r.width * 10) / 10,
+          height: Math.round(r.height * 10) / 10,
+          display: getComputedStyle(child).display,
+        };
+      });
+    })(),
+    composerRowChildren: (() => {
+      const row = document.querySelector(".uV2eYG_row");
+      if (!row) return [];
+      return [...row.children].map((child) => {
+        const r = child.getBoundingClientRect();
+        return {
+          class: child.className?.toString().slice(0, 120),
+          x: Math.round(r.x * 10) / 10,
+          y: Math.round(r.y * 10) / 10,
+          width: Math.round(r.width * 10) / 10,
+          height: Math.round(r.height * 10) / 10,
+          display: getComputedStyle(child).display,
+          alignSelf: getComputedStyle(child).alignSelf,
+        };
+      });
+    })(),
     input: box("[data-composer-input]"),
     inputScroll: box("[data-input-scroll]"),
     composerDock: box(".uV2eYG_dock"),
@@ -297,6 +336,8 @@ const a11y = await page.evaluate(async () => {
     ),
   ]
     .filter((el) => {
+      if (el.matches('input[type="file"][hidden]')) return false;
+      if (el.closest('[inert], [aria-hidden="true"]')) return false;
       const r = el.getBoundingClientRect();
       const cs = getComputedStyle(el);
       return (
@@ -304,6 +345,8 @@ const a11y = await page.evaluate(async () => {
         r.height > 0 &&
         cs.visibility !== "hidden" &&
         cs.display !== "none" &&
+        Number(cs.opacity) > 0 &&
+        cs.pointerEvents !== "none" &&
         (r.width < 44 || r.height < 44)
       );
     })

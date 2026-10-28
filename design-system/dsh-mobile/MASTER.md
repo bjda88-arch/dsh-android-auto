@@ -43,8 +43,9 @@ Rules:
 - Caption/meta: 11.5–12px.
 - Body line height: 1.55–1.62.
 - Chinese UI and answer text use zero added tracking.
-- Markdown body uses 14px/23px on compact phones; table cells use 13–14px with
-  strict CJK line breaking and balanced short values.
+- Markdown body uses 14px/23px on compact phones; table labels use 13px/500
+  secondary text and values use 14px primary text.
+- Short multi-step numeric lines use balanced wrapping when they contain arrows.
 - Numerals: tabular for progress, tokens, durations and counts.
 - WebView text zoom follows Android accessibility font scale from 85% to 150%.
 
@@ -52,7 +53,7 @@ Rules:
 
 - Controls and tabs: 10px.
 - Floating controls/banners: 14px.
-- Composer: 20px.
+- Composer: 18px.
 - Pills and circular buttons: 999px.
 - Hairline borders are 0.5px using semantic border tokens.
 
@@ -67,6 +68,8 @@ Rules:
 - Two-column answer tables use a 30/70 label/value split on the primary phone.
 - The composer preserves at least 12px below its metadata for Android gesture
   navigation.
+- Disabled send is a neutral control; DSH blue appears only when sending is
+  available.
 
 ## Icons
 
@@ -100,6 +103,10 @@ Rules:
 - Sidebar is a modal navigation drawer with a visible menu entry, tappable
   scrim and Android hardware-back dismissal.
 - Do not add a custom edge-swipe that competes with system back navigation.
+- The drawer uses symmetric 20px inner gutters in the 440px reference viewport,
+  a 44px Close target and a 48px bottom utility row.
+- The visible brand mark is identity, not a duplicate New Conversation action.
+- Function sections expose a directional chevron when they are collapsible.
 - Settings is a full-screen modal sheet with quiet text tabs and an underline
   for the current page.
 - The return-to-bottom control belongs to the composer's quiet upper-right

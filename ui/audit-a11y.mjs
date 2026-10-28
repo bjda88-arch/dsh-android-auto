@@ -5,9 +5,12 @@ import path from "node:path";
 const url = process.env.DSH_PREVIEW_URL;
 if (!url) throw new Error("DSH_PREVIEW_URL is required");
 
-const width = Number(process.env.VIEWPORT_WIDTH || 360);
-const height = Number(process.env.VIEWPORT_HEIGHT || 607);
+const width = Number(process.env.VIEWPORT_WIDTH || 440);
+const height = Number(process.env.VIEWPORT_HEIGHT || 744);
 const colorScheme = process.env.COLOR_SCHEME || "light";
+const deviceScaleFactor = Number(process.env.DEVICE_SCALE_FACTOR || 3);
+const reducedMotion =
+  process.env.REDUCED_MOTION === "1" ? "reduce" : "no-preference";
 const axeSource = fs.readFileSync(
   new URL("../node_modules/axe-core/axe.min.js", import.meta.url),
   "utf8",
@@ -23,7 +26,8 @@ const context = await browser.newContext({
   colorScheme,
   isMobile: true,
   hasTouch: true,
-  deviceScaleFactor: 2,
+  deviceScaleFactor,
+  reducedMotion,
 });
 const page = await context.newPage();
 await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
@@ -32,6 +36,12 @@ if (process.env.CSS_PATH) {
   await page.addStyleTag({
     content: fs.readFileSync(path.resolve(process.env.CSS_PATH), "utf8"),
   });
+}
+if (process.env.JS_PATH) {
+  await page.addScriptTag({
+    content: fs.readFileSync(path.resolve(process.env.JS_PATH), "utf8"),
+  });
+  await page.waitForTimeout(250);
 }
 await page.evaluate(() => {
   for (const el of document.querySelectorAll(
@@ -48,7 +58,15 @@ if (process.env.OPEN_DRAWER === "1") {
       [...document.querySelectorAll("[aria-label]")].find((el) =>
         /展开侧边栏|打开侧边栏/.test(el.getAttribute("aria-label") || ""),
       );
-    if (menu) menu.click();
+    if (menu) {
+      menu.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerType: "touch",
+        }),
+      );
+      menu.click();
+    }
   });
   await page.waitForTimeout(300);
 }
@@ -87,17 +105,26 @@ const result = await page.evaluate(async () => {
     'button, [role="button"], input, select, textarea, a[href], [tabindex]',
   )]
     .filter((el) => {
+      if (el.matches('input[type="file"][hidden]')) return false;
+      if (el.closest('[inert], [aria-hidden="true"]')) return false;
       const r = el.getBoundingClientRect();
       const cs = getComputedStyle(el);
       return r.width > 0 && r.height > 0 &&
         cs.visibility !== "hidden" && cs.display !== "none" &&
+        Number(cs.opacity) > 0 && cs.pointerEvents !== "none" &&
         (r.width < 44 || r.height < 44);
     })
     .slice(0, 80)
     .map((el) => {
       const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
       return {
         tag: el.tagName.toLowerCase(),
+        type: el.getAttribute("type") || "",
+        x: Math.round(r.x),
+        y: Math.round(r.y),
+        opacity: cs.opacity,
+        pointerEvents: cs.pointerEvents,
         text: (
           el.getAttribute("aria-label") ||
           el.textContent ||

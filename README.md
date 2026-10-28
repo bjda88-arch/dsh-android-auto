@@ -3,17 +3,17 @@
 This repository builds a private-signing Android release of DeepSeek Harness and
 follows the official DeepSeek Harness release feed.
 
-Current release: `v1.45.6`, with DSH `0.2.1-rc.2`.
+Current release: `v1.45.7`, with DSH `0.2.1-rc.2`.
 
-| Portrait 412 × 697 | Dark answer | Navigation drawer |
+| Portrait 440 × 744 | Dark answer | Navigation drawer |
 | --- | --- | --- |
-| ![Portrait conversation](docs/screenshots/portrait-412x697.png) | ![Dark conversation](docs/screenshots/content-dark-412x697.png) | ![Drawer](docs/screenshots/drawer-412x697.png) |
-| ![Light boot](docs/screenshots/boot-light-412x697.png) | ![Landscape](docs/screenshots/landscape-697x412.png) | ![Dark boot](docs/screenshots/boot-dark-412x697.png) |
+| ![Portrait conversation](docs/screenshots/portrait-440x744.png) | ![Dark conversation](docs/screenshots/content-dark-440x744.png) | ![Drawer](docs/screenshots/drawer-440x744.png) |
+| ![Light boot](docs/screenshots/boot-light-440x744.png) | ![Landscape](docs/screenshots/landscape-744x440.png) | ![Dark boot](docs/screenshots/boot-dark-440x744.png) |
 
 ## Mobile UI
 
 The primary geometry comes from the supplied 1320 × 2232 device capture,
-which maps to a 412 × 697 CSS viewport (approximately 1:1.691 portrait):
+which maps to a 440 × 744 CSS viewport at 3× density:
 
 - the collapsed sidebar rail no longer consumes content width;
 - navigation uses a full-height overlay drawer with a visible 48px hit area and
@@ -29,6 +29,10 @@ which maps to a 412 × 697 CSS viewport (approximately 1:1.691 portrait):
   above Android's gesture area;
 - the return-to-bottom control moves into the quiet upper-right composer area,
   where it cannot cover prose;
+- the drawer uses symmetric 20px inner gutters, a conventional close cross,
+  a vector disclosure icon and a safe bottom utility row;
+- the duplicate clickable logo action is removed from mobile accessibility,
+  while focus moves to Close on open and back to Menu on dismiss;
 - safe-area, software-keyboard, touch-target and landscape rules are bundled;
 - Android system font scaling is passed into WebView (85%–150%, safely clamped);
 - the boot screen uses cover scaling, so the display is not letterboxed.

@@ -5,9 +5,12 @@ import path from "node:path";
 const url = process.env.DSH_PREVIEW_URL;
 if (!url) throw new Error("DSH_PREVIEW_URL is required");
 
-const width = Number(process.env.VIEWPORT_WIDTH || 570);
-const height = Number(process.env.VIEWPORT_HEIGHT || 960);
+const width = Number(process.env.VIEWPORT_WIDTH || 440);
+const height = Number(process.env.VIEWPORT_HEIGHT || 744);
 const mobile = process.env.MOBILE !== "0";
+const deviceScaleFactor = Number(process.env.DEVICE_SCALE_FACTOR || 3);
+const reducedMotion =
+  process.env.REDUCED_MOTION === "1" ? "reduce" : "no-preference";
 const cssPath = process.env.CSS_PATH;
 const outPath = process.env.SHOT_PATH || "ui-preview.png";
 
@@ -21,10 +24,11 @@ const browser = await chromium.launch({
 });
 const context = await browser.newContext({
   viewport: { width, height },
-  deviceScaleFactor: 2,
+  deviceScaleFactor,
   isMobile: mobile,
   hasTouch: mobile,
   colorScheme: process.env.COLOR_SCHEME || "light",
+  reducedMotion,
 });
 const page = await context.newPage();
 await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
@@ -32,6 +36,12 @@ if (cssPath) {
   await page.addStyleTag({
     content: fs.readFileSync(path.resolve(cssPath), "utf8"),
   });
+}
+if (process.env.JS_PATH) {
+  await page.addScriptTag({
+    content: fs.readFileSync(path.resolve(process.env.JS_PATH), "utf8"),
+  });
+  await page.waitForTimeout(250);
 }
 await page.waitForTimeout(6000);
 if (process.env.DISMISS_NOTICE === "1") {
@@ -58,7 +68,15 @@ if (process.env.OPEN_DRAWER === "1") {
       [...document.querySelectorAll("[aria-label]")].find((el) =>
         /展开侧边栏|打开侧边栏/.test(el.getAttribute("aria-label") || ""),
       );
-    if (menu) menu.click();
+    if (menu) {
+      menu.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerType: "touch",
+        }),
+      );
+      menu.click();
+    }
   });
   await page.waitForTimeout(500);
 }
@@ -94,6 +112,15 @@ if (process.env.CLICK_LABELS) {
     await page.waitForTimeout(700);
   }
 }
+if (process.env.CLOSE_DRAWER_AFTER === "1") {
+  await page.evaluate(() => {
+    const close = document.querySelector(
+      '.pI_x6G_sidebarCol button[aria-label="关闭侧边栏"]',
+    );
+    if (close) close.click();
+  });
+  await page.waitForTimeout(500);
+}
 
 const audit = await page.evaluate(() => {
   const describe = (el) => {
@@ -115,6 +142,8 @@ const audit = await page.evaluate(() => {
       overflowX: cs.overflowX,
       overflowY: cs.overflowY,
       padding: cs.padding,
+      margin: cs.margin,
+      boxSizing: cs.boxSizing,
       fontSize: cs.fontSize,
     };
   };
@@ -177,6 +206,12 @@ const audit = await page.evaluate(() => {
         return {
           class: el.className?.toString().slice(0, 120),
           inlineWidth: el.style?.width || "",
+          x: Math.round(r.x),
+          y: Math.round(r.y),
+          width: Math.round(r.width),
+          height: Math.round(r.height),
+          padding: getComputedStyle(el).padding,
+          margin: getComputedStyle(el).margin,
           computedWidth: Math.round(r.width),
           children: [...el.children].slice(0, 3).map((c) => walk(c, depth + 1)),
         };
@@ -186,12 +221,36 @@ const audit = await page.evaluate(() => {
     columns: pick(
       '[class*="_sidebarCol"], [class*="_centerCol"], [class*="_rightbarCol"]',
     ),
+    drawerFooter: pick(
+      '[class*="_footArea"], [class*="_settingsArea"], [class*="_triggerRow"], [class*="_trigger"]',
+      20,
+    ),
     conversation: pick(
       '[class*="_root"], [class*="_header"], [class*="_scrollBody"], [class*="_composerSeat"]',
     ),
     composer: pick(
       '[data-composer-card], [class*="_inputBar"], [class*="_composer"], textarea, [contenteditable="true"]',
     ),
+    drawerState: {
+      open: Boolean(document.querySelector(".dsh-mobile-scrim")),
+      centerInert: Boolean(
+        document.querySelector('[class*="_centerCol"]')?.inert,
+      ),
+      activeLabel:
+        document.activeElement?.getAttribute("aria-label") ||
+        document.activeElement?.textContent?.replace(/\s+/g, " ").trim() ||
+        "",
+    },
+    motion: {
+      reduced: matchMedia("(prefers-reduced-motion: reduce)").matches,
+      drawerAnimation:
+        getComputedStyle(
+          document.querySelector('[class*="_sidebarCol"]'),
+        ).animationName,
+      scrimAnimation:
+        getComputedStyle(document.querySelector(".dsh-mobile-scrim") || document.body)
+          .animationName,
+    },
     buttons: pick(
       'button, [role="button"], [data-cordis-badge], [class*="_navCell"]',
       80,

@@ -4,14 +4,13 @@ Updated: 2026-10-28
 
 ## Scope
 
-The latest reference is the supplied physical-device capture at 1320 × 2232.
-At a 3.2 density this maps to an effective 412 × 697 CSS viewport, slightly
-taller than 16:9.5. The DSH Web UI was audited at:
+The latest references are two supplied physical-device captures at
+1320 × 2232. At 3× density this maps to a 440 × 744 CSS viewport. The DSH Web
+UI was audited at:
 
-- `412 x 697` portrait, matching the supplied device frame
+- `440 x 744` portrait, matching both supplied device frames
 - `360 x 609` portrait, small-phone check at the same ratio
-- `697 x 412` landscape
-- `412 x 650` shorter usable-WebView check
+- `744 x 440` landscape
 
 The audit used the UI UX Pro Max accessibility, touch, layout, navigation,
 motion and performance rules; the Appllama native-app design workflow; and the
@@ -42,6 +41,15 @@ live DSH DOM and its upstream design tokens.
 15. Composer metadata was clipped by the Android gesture area.
 16. The floating return-to-bottom control could cover the final paragraph.
 17. Keyboard shortcut hints in the dark account menu measured only 3.66:1.
+18. The padded drawer wrapper used content-box sizing and overflowed the panel
+    by about 20px, producing 24px left and 5px right content margins.
+19. The drawer footer extended to within 2px of the bottom edge.
+20. The drawer close affordance used the same split-pane glyph as the desktop
+    side-panel control and did not read as Close.
+21. The visible logo was also announced as a duplicate New Conversation button.
+22. The collapsible Features row had text but no directional chevron.
+23. The 18px title had been reduced to 15px, leaving insufficient hierarchy.
+24. The disabled send button retained a blue fill and looked actionable.
 
 ## Changes
 
@@ -85,6 +93,20 @@ live DSH DOM and its upstream design tokens.
 - Return-to-bottom is a 38px visual control with a 44px expanded hit area and
   is placed in the composer's quiet upper-right area.
 - Keyboard shortcut hints now use the secondary label token in both themes.
+- The drawer uses border-box sizing at every padded level, creating symmetric
+  20px content gutters.
+- The close control is a conventional X with a 44px hit area. Opening moves
+  focus to Close; dismissing returns focus to Menu.
+- The decorative brand is removed from mobile pointer and accessibility order
+  because the dedicated New Conversation action already exists.
+- Collapsible Features sections expose a chevron, and the former text glyph is
+  replaced by vector grid geometry.
+- Workspace section labels are 12px/600 secondary text instead of competing at
+  body size.
+- The footer More control is a full-width 48px row above the bottom safe area.
+- The page title is restored to 18px/600. Table labels use 13px secondary text
+    and values use 14px primary text.
+- Disabled send is neutral; enabled send is the only blue action.
 - At 150% text scaling, the header grows to 86px, the model selector receives
   a full second toolbar row, and the composer expands without clipping its
   placeholder or metadata. The page remains free of horizontal overflow.
@@ -93,13 +115,16 @@ live DSH DOM and its upstream design tokens.
 
 | Viewport | Horizontal overflow | Header | Composer | Input card |
 | --- | --- | ---: | ---: | ---: |
-| 412 x 697 | none | 79px with tabs | 394px (95.7%) | 394px (95.7%) |
+| 440 x 744 | none | 79px with tabs | 421px (95.7%) | 421px (95.7%) |
 | 360 x 609 | none | 79px with tabs | 344px (95.6%) | 344px (95.6%) |
-| 697 x 412 | none | 79px with tabs | 673px (96.6%) | 673px (96.6%) |
+| 744 x 440 | none | 79px with tabs | 719px (96.6%) | 719px (96.6%) |
 
-At 412px, the table columns measure 118px / 276px. At 360px they measure
-89px / 255px. The model label measures 130px against 130px of available text
+At 440px, the table columns measure 126px / 295px. At 360px they measure
+89px / 255px. The model label measures 122px against 122px of available text
 width, so the tested model name is not truncated.
+
+The drawer measures 361px overall. Content begins and ends 20px from its
+edges, Close is 44px, and the bottom More row is 48px with a 16px safe gap.
 
 ## Visual-system checks
 
