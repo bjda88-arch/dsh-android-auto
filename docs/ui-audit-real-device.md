@@ -107,6 +107,9 @@ live DSH DOM and its upstream design tokens.
 - The page title is restored to 18px/600. Table labels use 13px secondary text
     and values use 14px primary text.
 - Disabled send is neutral; enabled send is the only blue action.
+- The New Conversation capsule uses only a centered text label. Its leading
+  add glyph and keyboard shortcut are hidden, and flex alignment centers the
+  glyph box both horizontally and vertically.
 - At 150% text scaling, the header grows to 86px, the model selector receives
   a full second toolbar row, and the composer expands without clipping its
   placeholder or metadata. The page remains free of horizontal overflow.

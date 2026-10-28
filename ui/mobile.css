@@ -2072,6 +2072,49 @@ pre, code {
     border-color: var(--dsw-alias-border-l2) !important;
   }
 
+  /* The dedicated New Conversation action reads more cleanly as one centered
+     label. The add glyph and keyboard shortcut are not repeated on mobile. */
+  .pI_x6G_sidebarCol
+    button[class*="_newSession"]
+    [class*="_newSessionContent"] {
+    width: 100% !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+
+  .pI_x6G_sidebarCol
+    button[class*="_newSession"]
+    [class*="_newSessionContent"]
+    svg,
+  .pI_x6G_sidebarCol
+    button[class*="_newSession"]
+    [class*="_newSessionShortcut"] {
+    display: none !important;
+  }
+
+  .pI_x6G_sidebarCol
+    button[class*="_newSession"]
+    [class*="_newSessionLabelMask"] {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .pI_x6G_sidebarCol
+    button[class*="_newSession"]
+    [class*="_newSessionLabel"]:not([class*="_newSessionLabelMask"]) {
+    display: flex !important;
+    width: auto !important;
+    max-width: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
   .pI_x6G_sidebarCol button[class*="_newSession"]:active {
     background: var(--dsw-alias-interactive-bg-hover-solid) !important;
   }

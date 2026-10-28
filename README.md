@@ -3,7 +3,7 @@
 This repository builds a private-signing Android release of DeepSeek Harness and
 follows the official DeepSeek Harness release feed.
 
-Current release: `v1.45.7`, with DSH `0.2.1-rc.2`.
+Current release: `v1.45.8`, with DSH `0.2.1-rc.2`.
 
 | Portrait 440 × 744 | Dark answer | Navigation drawer |
 | --- | --- | --- |
@@ -33,6 +33,8 @@ which maps to a 440 × 744 CSS viewport at 3× density:
   a vector disclosure icon and a safe bottom utility row;
 - the duplicate clickable logo action is removed from mobile accessibility,
   while focus moves to Close on open and back to Menu on dismiss;
+- the New Conversation capsule contains only its centered label; the add glyph
+  and invisible keyboard shortcut no longer shift it off-center;
 - safe-area, software-keyboard, touch-target and landscape rules are bundled;
 - Android system font scaling is passed into WebView (85%–150%, safely clamped);
 - the boot screen uses cover scaling, so the display is not letterboxed.

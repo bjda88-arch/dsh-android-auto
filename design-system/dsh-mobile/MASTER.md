@@ -106,6 +106,8 @@ Rules:
 - The drawer uses symmetric 20px inner gutters in the 440px reference viewport,
   a 44px Close target and a 48px bottom utility row.
 - The visible brand mark is identity, not a duplicate New Conversation action.
+- The New Conversation capsule is a single centered text action on mobile; do
+  not repeat an add glyph or desktop shortcut inside it.
 - Function sections expose a directional chevron when they are collapsible.
 - Settings is a full-screen modal sheet with quiet text tabs and an underline
   for the current page.
