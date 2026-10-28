@@ -87,6 +87,18 @@ Rules:
 - All spatial motion is disabled under `prefers-reduced-motion`; the final state
   remains fully usable.
 
+## Performance
+
+- Do not attach `MutationObserver` work to the whole document while answers are
+  streaming. Observe the conversation root, batch only changed paragraphs, and
+  run typographic refinement during idle time.
+- Do not read composer geometry on every `input` event. Let `ResizeObserver`
+  publish size changes and coalesce any fallback work.
+- Avoid live `backdrop-filter` on fixed controls and full-screen scrims. Use
+  semantic translucent or opaque surfaces instead.
+- Keep the WebView on a hardware layer and use no native overscroll glow or host
+  scrollbars; the page owns its own scrolling surface.
+
 ## Startup screen
 
 - Same background, text colors, whale mark and blue accent as the application.

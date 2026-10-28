@@ -110,6 +110,12 @@ live DSH DOM and its upstream design tokens.
 - The New Conversation capsule uses only a centered text label. Its leading
   add glyph and keyboard shortcut are hidden, and flex alignment centers the
   glyph box both horizontally and vertically.
+- Streaming Markdown is now observed only under the conversation body and its
+  typographic balancing runs incrementally during browser idle time.
+- Composer geometry is published by `ResizeObserver` instead of synchronous
+  reads on every keystroke.
+- Full-screen, menu, selector and fixed-control backdrop blur was removed to
+  reduce composition cost on mid-range Android WebViews.
 - At 150% text scaling, the header grows to 86px, the model selector receives
   a full second toolbar row, and the composer expands without clipping its
   placeholder or metadata. The page remains free of horizontal overflow.

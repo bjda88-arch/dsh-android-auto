@@ -677,6 +677,12 @@ pre, code {
    ========================================================================== */
 
 @media (max-width: 1023px) {
+  html body {
+    --dsw-menu-surface-fill: var(--dsw-alias-bg-layer-2) !important;
+    --dsw-specific-menu: var(--dsw-alias-bg-layer-2) !important;
+    --dsw-menu-backdrop-filter: none !important;
+  }
+
   :root {
     --dsh-mobile-edge: clamp(6px, 1.45vw, 10px);
     --dsh-mobile-header-height: 48px;
@@ -881,12 +887,7 @@ pre, code {
     box-sizing: border-box !important;
     border-radius: 14px !important;
     color: var(--dsw-alias-label-secondary) !important;
-    background: color-mix(
-      in srgb,
-      var(--dsw-alias-bg-base) 78%,
-      transparent
-    ) !important;
-    backdrop-filter: blur(12px) saturate(130%);
+    background: var(--dsw-alias-bg-base) !important;
     transition:
       background-color 120ms ease,
       transform 120ms ease !important;
@@ -951,8 +952,7 @@ pre, code {
   }
 
   .dsh-mobile-scrim {
-    background: rgba(5, 8, 15, 0.24) !important;
-    backdrop-filter: blur(2px);
+    background: rgba(5, 8, 15, 0.32) !important;
     animation: dsh-mobile-scrim-in 160ms ease-out both;
   }
 
@@ -1265,7 +1265,6 @@ pre, code {
     color: var(--dsw-alias-label-primary);
     background: var(--dsw-specific-menu, var(--dsw-alias-bg-layer-2));
     box-shadow: var(--dsw-elevation-prominent, 0 8px 28px rgba(0, 0, 0, 0.18));
-    backdrop-filter: var(--dsw-menu-backdrop-filter, blur(18px));
     font-size: 12px;
     line-height: 1.45;
   }
@@ -1606,7 +1605,7 @@ pre, code {
     border-radius: 18px !important;
     gap: 8px !important;
     box-shadow:
-      0 8px 26px rgba(0, 0, 0, 0.075),
+      0 6px 16px rgba(0, 0, 0, 0.06),
       0 0 0 0.5px var(--dsw-alias-border-l1) !important;
   }
 
@@ -1778,7 +1777,6 @@ pre, code {
     color: var(--dsw-alias-label-secondary) !important;
     background: var(--dsw-specific-input-major) !important;
     box-shadow: 0 5px 18px rgba(0, 0, 0, 0.09) !important;
-    backdrop-filter: blur(10px) saturate(125%);
   }
 
   [class*="_toBottomSlot"] > button::after,

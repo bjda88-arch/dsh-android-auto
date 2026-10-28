@@ -290,10 +290,11 @@
   var drawerStateObserver = null;
   var lastDrawerPointerAt = 0;
   var contentObserver = null;
-  var contentFrame = 0;
-  var requestFrame =
-    window.requestAnimationFrame ||
-    function (callback) { return setTimeout(callback, 16); };
+  var contentIdle = 0;
+  var pendingTokenParagraphs = new Set();
+  var requestIdle =
+    window.requestIdleCallback ||
+    function (callback) { return setTimeout(callback, 120); };
 
   function menuButton() {
     return document.querySelector('.dsh-mobile-menu-btn');
@@ -408,28 +409,38 @@
   }
 
   function publishComposerMetrics() {
-    var card = document.querySelector('[data-composer-card]');
-    var dock = document.querySelector('[data-composer-dock]');
+    var card = observedComposerCard || document.querySelector('[data-composer-card]');
+    var dock = observedComposerDock || document.querySelector('[data-composer-dock]');
     if (card) {
-      root.style.setProperty(
-        '--dsh-mobile-composer-card-height',
-        Math.round(card.getBoundingClientRect().height * 100) / 100 + 'px'
-      );
+      var nextCardHeight =
+        Math.round(card.getBoundingClientRect().height * 100) / 100 + 'px';
+      if (root.style.getPropertyValue('--dsh-mobile-composer-card-height') !== nextCardHeight) {
+        root.style.setProperty(
+          '--dsh-mobile-composer-card-height',
+          nextCardHeight
+        );
+      }
     }
     if (dock) {
-      root.style.setProperty(
-        '--dsh-mobile-composer-dock-height',
-        Math.round(dock.getBoundingClientRect().height * 100) / 100 + 'px'
-      );
+      var nextDockHeight =
+        Math.round(dock.getBoundingClientRect().height * 100) / 100 + 'px';
+      if (root.style.getPropertyValue('--dsh-mobile-composer-dock-height') !== nextDockHeight) {
+        root.style.setProperty(
+          '--dsh-mobile-composer-dock-height',
+          nextDockHeight
+        );
+      }
     }
     var inputScroll = document.querySelector('[data-input-scroll]');
     if (inputScroll) {
       var isScrollable = inputScroll.scrollHeight > inputScroll.clientHeight + 1;
       if (isScrollable) {
-        inputScroll.tabIndex = 0;
-        inputScroll.setAttribute('role', 'region');
-        inputScroll.setAttribute('aria-label', '消息输入内容');
-        inputScroll.setAttribute('data-dsh-scroll-focus', 'true');
+        if (inputScroll.getAttribute('data-dsh-scroll-focus') !== 'true') {
+          inputScroll.tabIndex = 0;
+          inputScroll.setAttribute('role', 'region');
+          inputScroll.setAttribute('aria-label', '消息输入内容');
+          inputScroll.setAttribute('data-dsh-scroll-focus', 'true');
+        }
       } else if (inputScroll.getAttribute('data-dsh-scroll-focus') === 'true') {
         inputScroll.removeAttribute('tabindex');
         inputScroll.removeAttribute('role');
@@ -497,10 +508,11 @@
   }
 
   function markTokenLines() {
-    contentFrame = 0;
-    var paragraphs = document.querySelectorAll('[class*="_markdown_"] p');
-    for (var i = 0; i < paragraphs.length; i += 1) {
-      var paragraph = paragraphs[i];
+    contentIdle = 0;
+    var paragraphs = pendingTokenParagraphs;
+    pendingTokenParagraphs = new Set();
+    paragraphs.forEach(function (paragraph) {
+      if (!paragraph.isConnected) return;
       var text = (paragraph.textContent || '').trim();
       var shouldBalance =
         text.length >= 24 &&
@@ -512,29 +524,74 @@
       } else if (paragraph.hasAttribute('data-dsh-token-line')) {
         paragraph.removeAttribute('data-dsh-token-line');
       }
+    });
+  }
+
+  function queueParagraphs(node) {
+    if (!node) return;
+    var element = node.nodeType === 1 ? node : node.parentElement;
+    if (!element || !element.closest) return;
+    var markdown =
+      element.closest('[class*="_markdown_"]') ||
+      element.querySelector('[class*="_markdown_"]');
+    if (!markdown) return;
+    var containingParagraph = element.closest('p');
+    if (containingParagraph && markdown.contains(containingParagraph)) {
+      pendingTokenParagraphs.add(containingParagraph);
+    }
+    var paragraphs = element.querySelectorAll('p');
+    for (var i = 0; i < paragraphs.length; i += 1) {
+      pendingTokenParagraphs.add(paragraphs[i]);
     }
   }
 
-  function scheduleContentEnhancement() {
-    if (contentFrame) return;
-    contentFrame = requestFrame(markTokenLines);
+  function scheduleContentEnhancement(records) {
+    for (var i = 0; i < records.length; i += 1) {
+      var record = records[i];
+      if (record.type === 'characterData') {
+        queueParagraphs(record.target.parentElement);
+      } else {
+        for (var j = 0; j < record.addedNodes.length; j += 1) {
+          queueParagraphs(record.addedNodes[j]);
+        }
+      }
+    }
+    if (contentIdle || pendingTokenParagraphs.size === 0) return;
+    contentIdle = requestIdle(markTokenLines, { timeout: 700 });
   }
 
-  function watchConversationContent() {
+  function watchConversationContent(attempt) {
     if (contentObserver || typeof MutationObserver !== 'function') return;
+    var contentRoot = document.querySelector('.wSkVaW_body');
+    if (!contentRoot) {
+      if ((attempt || 0) < 40) {
+        setTimeout(function () {
+          watchConversationContent((attempt || 0) + 1);
+        }, 250);
+      }
+      return;
+    }
     contentObserver = new MutationObserver(scheduleContentEnhancement);
-    contentObserver.observe(document.documentElement, {
+    contentObserver.observe(contentRoot, {
       childList: true,
       characterData: true,
       subtree: true
     });
-    scheduleContentEnhancement();
+    var initialParagraphs = contentRoot.querySelectorAll(
+      '[class*="_markdown_"] p'
+    );
+    for (var i = 0; i < initialParagraphs.length; i += 1) {
+      pendingTokenParagraphs.add(initialParagraphs[i]);
+    }
+    queueParagraphs(contentRoot);
+    scheduleContentEnhancement([]);
   }
 
   function scheduleSync() {
     if (syncTimer) return;
     syncTimer = setTimeout(function () {
       syncTimer = 0;
+      syncComposerMetrics();
       syncDrawerState();
     }, 0);
   }
@@ -564,12 +621,6 @@
     lastDrawerPointerAt = Date.now();
   }, true);
 
-  document.addEventListener('input', function (event) {
-    if (!event.target || !event.target.closest) return;
-    if (!event.target.closest('[data-composer-card]')) return;
-    requestAnimationFrame(publishComposerMetrics);
-  }, true);
-
   window.addEventListener('resize', markViewport, { passive: true });
   window.addEventListener('orientationchange', function () {
     setTimeout(markViewport, 160);
@@ -581,7 +632,7 @@
       markViewport();
       setTimeout(syncComposerMetrics, 120);
       watchForComposer();
-      watchConversationContent();
+      watchConversationContent(0);
       watchDrawerState();
       root.classList.add('dsh-mobile-ready');
     });
@@ -589,7 +640,7 @@
     markViewport();
     setTimeout(syncComposerMetrics, 120);
     watchForComposer();
-    watchConversationContent();
+    watchConversationContent(0);
     watchDrawerState();
     root.classList.add('dsh-mobile-ready');
   }
